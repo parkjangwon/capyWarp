@@ -95,6 +95,18 @@
     <string name="settings_app_version">App version</string>
     <string name="settings_version_detail">Version %1$s (Build %2$d)</string>
 
+    <!-- Newly added settings (placeholder English to satisfy lint) -->
+    <string name="settings_auto_attach">Auto-attach selected text</string>
+    <string name="settings_auto_attach_position">Attach position</string>
+    <string name="settings_attach_top">Top</string>
+    <string name="settings_attach_bottom">Bottom</string>
+
+    <!-- Prompt list actions -->
+    <string name="duplicate">Duplicate</string>
+
+    <!-- Prompt editor additions -->
+    <string name="editor_insert_text_token">Insert $TEXT</string>
+
     <string name="editor_section_response_format">Response format</string>
     <string name="editor_section_result_action">Result handling</string>
 
