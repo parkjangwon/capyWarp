@@ -14,10 +14,9 @@ data class SettingsData(
     val autoAttachPosition: String = "top"
 )
 
+// Keep meta for future-proofing, but only persist DB version in backups.
 @Serializable
 data class BackupMeta(
-    val appVersionName: String,
-    val appVersionCode: Int,
     val dbVersion: Int
 )
 

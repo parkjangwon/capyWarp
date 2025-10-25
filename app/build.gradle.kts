@@ -98,4 +98,7 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
+
+    // Compose reorderable list (stable drag-and-drop for LazyColumn)
+    implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
 }

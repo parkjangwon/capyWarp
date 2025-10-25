@@ -139,9 +139,8 @@ class SettingsViewModel @Inject constructor(
                 val payload = BackupPayload(
                     prompts = all,
                     settings = settingsData,
+                    // Only persist DB version in backups; app version info is not needed.
                     meta = org.parkjw.capywarp.data.model.BackupMeta(
-                        appVersionName = org.parkjw.capywarp.BuildConfig.VERSION_NAME,
-                        appVersionCode = org.parkjw.capywarp.BuildConfig.VERSION_CODE,
                         dbVersion = 2
                     )
                 )
@@ -167,6 +166,7 @@ class SettingsViewModel @Inject constructor(
                     val payload = json.decodeFromString<BackupPayload>(jsonText)
                     // restore settings
                     settings.setApiKey(payload.settings.apiKey)
+                    _apiKey.value = payload.settings.apiKey
                     settings.setTheme(payload.settings.theme)
                     settings.setModel(payload.settings.model)
                     settings.setImageModel(payload.settings.imageModel)

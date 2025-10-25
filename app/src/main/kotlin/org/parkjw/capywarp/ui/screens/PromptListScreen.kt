@@ -32,14 +32,14 @@ import androidx.compose.material.icons.filled.Reorder
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.pointer.PointerInputChange
-import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.graphics.graphicsLayer
+import org.burnoutcrew.reorderable.detectReorderAfterLongPress
+import org.burnoutcrew.reorderable.rememberReorderableLazyListState
+import org.burnoutcrew.reorderable.reorderable
+import org.burnoutcrew.reorderable.ReorderableItem
 
 
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
@@ -55,17 +55,14 @@ fun PromptListScreen(
     var selectedIds by remember { mutableStateOf(setOf<Int>()) }
     var showConfirm by remember { mutableStateOf(false) }
 
-    // Local reorderable list state
-    val density = androidx.compose.ui.platform.LocalDensity.current
-    val itemHeightPx = with(density) { 72.dp.toPx() }
-    var isDragging by remember { mutableStateOf(false) }
-    var draggingId by remember { mutableStateOf<Int?>(null) }
-    var dragAccumulated by remember { mutableStateOf(0f) }
-    var localList by remember(prompts) { mutableStateOf(prompts.sortedBy { it.order }) }
-    // Track a measured row height (px) for reliable swap thresholds across devices
-    var measuredRowHeightPx by remember { mutableStateOf(itemHeightPx) }
-    if (!isDragging && localList.map { it.id } != prompts.map { it.id }) {
-        localList = prompts.sortedBy { it.order }
+    // Use SnapshotStateList for stable in-place reordering without recreating the list on every move
+    val localList = remember { androidx.compose.runtime.mutableStateListOf<org.parkjw.capywarp.data.model.Prompt>() }
+    // Seed/refresh contents only when backing data changes (preserve current order while dragging)
+    LaunchedEffect(prompts) {
+        val ordered = prompts.sortedBy { it.order }
+        // Replace contents while minimizing churn
+        localList.clear()
+        localList.addAll(ordered)
     }
 
     fun toggleSelect(id: Int) {
@@ -153,147 +150,92 @@ fun PromptListScreen(
                 )
             }
         } else {
-            val listState = androidx.compose.foundation.lazy.rememberLazyListState()
-            LazyColumn(modifier = Modifier.padding(paddingValues), state = listState) {
+            val listState = rememberLazyListState()
+            val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
+            var firstMoveHandled by remember { mutableStateOf(false) }
+            val reorderState = rememberReorderableLazyListState(
+                listState = listState,
+                onMove = { from, to ->
+                    // On the first move, enter selection mode and select the dragged item
+                    if (!firstMoveHandled) {
+                        firstMoveHandled = true
+                        if (!selectionMode) selectionMode = true
+                        selectedIds = setOf(localList.getOrNull(from.index)?.id ?: 0)
+                        try { haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress) } catch (_: Exception) {}
+                    }
+                    // In-place mutate the SnapshotStateList to avoid recomposition churn
+                    if (from.index != to.index && from.index in 0 until localList.size && to.index in 0..localList.size) {
+                        val moved = localList.removeAt(from.index)
+                        val safeTo = to.index.coerceIn(0, localList.size)
+                        localList.add(safeTo, moved)
+                    }
+                    try { haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove) } catch (_: Exception) {}
+                },
+                onDragEnd = { _, _ ->
+                    firstMoveHandled = false
+                    viewModel.persistOrder(localList)
+                }
+            )
+            LazyColumn(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .reorderable(reorderState),
+                state = listState
+            ) {
                 items(localList, key = { it.id }) { prompt ->
                     val checked = selectedIds.contains(prompt.id)
-                    // Track last drag direction to stabilize accumulator and prevent overshoot
-                    var lastDragDir by remember { mutableStateOf(0) }
-                    ListItem(
-                        headlineContent = { Text(prompt.title) },
-                        supportingContent = {
-                            val actionLabel = if (prompt.outputType == 0) {
-                                when (prompt.resultAction) {
-                                    1 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_copy_to_clipboard)
-                                    2 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_notification)
-                                    else -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_process_result)
-                                }
-                            } else {
-                                when (prompt.resultAction) {
-                                    2 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_notification_image)
-                                    3 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_save_gallery)
-                                    else -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_process_result)
-                                }
-                            }
-                            Column {
-                                if (prompt.template.isNotBlank()) {
-                                    Text(
-                                        text = prompt.template.take(60).replace("\n", " ") + if (prompt.template.length > 60) "…" else "",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                                Text(actionLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
-                        },
-                        colors = ListItemDefaults.colors(
-                            containerColor = if (checked) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .animateItemPlacement()
-                            .onSizeChanged { measuredRowHeightPx = it.height.toFloat().coerceAtLeast(1f) }
-                            .pointerInput(Unit) {
-                                // Long-press to start drag; normal scroll works before long-press.
-                                detectDragGesturesAfterLongPress(
-                                    onDragStart = { _: Offset ->
-                                        if (!selectionMode) selectionMode = true
-                                        selectedIds = setOf(prompt.id)
-                                        draggingId = prompt.id
-                                        isDragging = true
-                                        dragAccumulated = 0f
-                                        lastDragDir = 0
-                                        try { haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress) } catch (_: Exception) {}
-                                    },
-                                    onDragEnd = {
-                                        if (isDragging && draggingId == prompt.id) {
-                                            isDragging = false
-                                            draggingId = null
-                                            dragAccumulated = 0f
-                                            lastDragDir = 0
-                                            viewModel.persistOrder(localList)
-                                        }
-                                    },
-                                    onDragCancel = {
-                                        if (isDragging && draggingId == prompt.id) {
-                                            isDragging = false
-                                            draggingId = null
-                                            dragAccumulated = 0f
-                                            lastDragDir = 0
-                                        }
-                                    },
-                                    onDrag = { change: PointerInputChange, dragAmount: Offset ->
-                                        if (!isDragging || draggingId != prompt.id) return@detectDragGesturesAfterLongPress
-                                        // Consume drag and translate into reordering primarily
-                                        change.consume()
-                                        val dy = dragAmount.y
-                                        val dir = when {
-                                            dy > 1f -> 1
-                                            dy < -1f -> -1
-                                            else -> 0
-                                        }
-                                        // Reset accumulator when direction flips to avoid overshoot
-                                        if (dir != 0 && lastDragDir != 0 && dir != lastDragDir) {
-                                            dragAccumulated = 0f
-                                        }
-                                        if (dir != 0) lastDragDir = dir
-
-                                        val perItem = measuredRowHeightPx.takeIf { it > 1f } ?: itemHeightPx
-                                        dragAccumulated += dy
-
-                                        var currentIndex = localList.indexOfFirst { it.id == draggingId }
-                                        if (currentIndex == -1) return@detectDragGesturesAfterLongPress
-
-                                        var swaps = 0
-                                        var swappedThisFrame = false
-                                        while (kotlin.math.abs(dragAccumulated) > perItem * 0.5f && swaps < 6) {
-                                            if (dragAccumulated > 0 && currentIndex < localList.lastIndex) {
-                                                val mutable = localList.toMutableList()
-                                                val item = mutable.removeAt(currentIndex)
-                                                mutable.add(currentIndex + 1, item)
-                                                localList = mutable
-                                                currentIndex += 1
-                                                dragAccumulated -= perItem
-                                                swaps++
-                                                swappedThisFrame = true
-                                                try { haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove) } catch (_: Exception) {}
-                                            } else if (dragAccumulated < 0 && currentIndex > 0) {
-                                                val mutable = localList.toMutableList()
-                                                val item = mutable.removeAt(currentIndex)
-                                                mutable.add(currentIndex - 1, item)
-                                                localList = mutable
-                                                currentIndex -= 1
-                                                dragAccumulated += perItem
-                                                swaps++
-                                                swappedThisFrame = true
-                                                try { haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove) } catch (_: Exception) {}
-                                            } else {
-                                                break
-                                            }
-                                        }
-
-                                        // Gentle edge auto-scroll when dragging without swap and close to list edges
-                                        if (!swappedThisFrame && dir != 0) {
-                                            val firstIndex = listState.firstVisibleItemIndex
-                                            val lastIndex = (firstIndex + listState.layoutInfo.visibleItemsInfo.size - 1).coerceAtLeast(firstIndex)
-                                            // If moving up and not at very top, or moving down and not at very bottom, scroll a bit
-                                            if ((dir < 0 && (firstIndex > 0 || listState.firstVisibleItemScrollOffset > 0)) ||
-                                                (dir > 0 && lastIndex < localList.lastIndex)) {
-                                                val delta = if (dir > 0) 24f else -24f
-                                                try {
-                                                    // scrollBy must be called from a coroutine
-                                                    scope.launch { listState.scrollBy(delta) }
-                                                } catch (_: Exception) {}
-                                            }
-                                        }
+                    ReorderableItem(reorderState, key = prompt.id) { isDragging ->
+                        ListItem(
+                            headlineContent = { Text(prompt.title) },
+                            supportingContent = {
+                                val actionLabel = if (prompt.outputType == 0) {
+                                    when (prompt.resultAction) {
+                                        1 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_copy_to_clipboard)
+                                        2 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_notification)
+                                        else -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_process_result)
                                     }
-                                )
-                            }
-                            .clickable {
-                                if (selectionMode) toggleSelect(prompt.id) else onEditPrompt(prompt.id)
-                            }
-                    )
-                    Divider()
+                                } else {
+                                    when (prompt.resultAction) {
+                                        2 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_notification_image)
+                                        3 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_save_gallery)
+                                        else -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_process_result)
+                                    }
+                                }
+                                Column {
+                                    if (prompt.template.isNotBlank()) {
+                                        Text(
+                                            text = prompt.template.take(60).replace("\n", " ") + if (prompt.template.length > 60) "…" else "",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    Text(actionLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            },
+                            colors = ListItemDefaults.colors(
+                                containerColor = if (checked) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .then(if (!isDragging) Modifier.animateItemPlacement() else Modifier)
+                                .graphicsLayer {
+                                    if (isDragging) {
+                                        shadowElevation = 12f
+                                        scaleX = 1.01f
+                                        scaleY = 1.01f
+                                    } else {
+                                        shadowElevation = 0f
+                                        scaleX = 1f
+                                        scaleY = 1f
+                                    }
+                                }
+                                .detectReorderAfterLongPress(reorderState)
+                                .clickable {
+                                    if (selectionMode) toggleSelect(prompt.id) else onEditPrompt(prompt.id)
+                                }
+                        )
+                        Divider()
+                    }
                 }
             }
         }
