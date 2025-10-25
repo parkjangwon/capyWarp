@@ -123,15 +123,19 @@ class WarpProcessService : Service() {
         }
         val text = intent?.getStringExtra(EXTRA_TEXT) ?: ""
         val promptId = intent?.getIntExtra(EXTRA_PROMPT_ID, -1) ?: -1
-        val imageUri: Uri? = if (intent?.hasExtra(EXTRA_IMAGE_URI) == true) {
-            if (android.os.Build.VERSION.SDK_INT >= 33) {
-                intent.getParcelableExtra(EXTRA_IMAGE_URI, Uri::class.java)
-            } else {
-                @Suppress("DEPRECATION")
-                intent.getParcelableExtra(EXTRA_IMAGE_URI) as? Uri
+        // Support generic attachment (images, documents, etc.) with backward-compatible fallback
+        val attachmentUri: Uri? = when {
+            intent?.hasExtra(EXTRA_ATTACHMENT_URI) == true -> {
+                if (android.os.Build.VERSION.SDK_INT >= 33) intent.getParcelableExtra(EXTRA_ATTACHMENT_URI, Uri::class.java)
+                else @Suppress("DEPRECATION") intent.getParcelableExtra(EXTRA_ATTACHMENT_URI) as? Uri
             }
-        } else null
-        if ((text.isBlank() && imageUri == null) || promptId <= 0) {
+            intent?.hasExtra(EXTRA_IMAGE_URI) == true -> { // legacy
+                if (android.os.Build.VERSION.SDK_INT >= 33) intent.getParcelableExtra(EXTRA_IMAGE_URI, Uri::class.java)
+                else @Suppress("DEPRECATION") intent.getParcelableExtra(EXTRA_IMAGE_URI) as? Uri
+            }
+            else -> null
+        }
+        if ((text.isBlank() && attachmentUri == null) || promptId <= 0) {
             stopSelf(startId)
             return START_NOT_STICKY
         }
@@ -155,8 +159,11 @@ class WarpProcessService : Service() {
                     return@launch
                 }
 
-                val inputImageBytes: ByteArray? = try {
-                    if (imageUri != null) contentResolver.openInputStream(imageUri)?.use { it.readBytes() } else null
+                // Resolve attachment bytes and MIME (fallback to content resolver if not provided)
+                val providedMime = intent?.getStringExtra(EXTRA_ATTACHMENT_MIME)
+                val resolvedMime = providedMime ?: (attachmentUri?.let { contentResolver.getType(it) })
+                val attachmentBytes: ByteArray? = try {
+                    if (attachmentUri != null) contentResolver.openInputStream(attachmentUri)?.use { it.readBytes() } else null
                 } catch (e: Exception) { null }
 
                 // Retry generateContent up to 3 times for non-network/server errors
@@ -169,7 +176,7 @@ class WarpProcessService : Service() {
                         if (attemptGen > 1) {
                             updateProgressText(getString(org.parkjw.capywarp.R.string.notif_processing_retry_text, attemptGen, 3))
                         }
-                        result = geminiRepository.generateContent(text, prompt, inputImageBytes)
+                        result = geminiRepository.generateContent(text, prompt, attachmentBytes, resolvedMime)
                         break
                     } catch (e: Exception) {
                         lastEx = e
@@ -285,7 +292,7 @@ class WarpProcessService : Service() {
                                 kotlinx.coroutines.delay(200L * attempt) 
                             } catch (_: Exception) {}
                             try {
-                                currentResult = geminiRepository.generateContent(text, prompt, inputImageBytes)
+                                currentResult = geminiRepository.generateContent(text, prompt, attachmentBytes, resolvedMime)
                             } catch (e: Exception) {
                                 // 네트워크/서버 오류는 상위 로직과 동일한 정책을 따르므로 바로 중단
                                 lastErr = e.message ?: lastErr
@@ -591,7 +598,9 @@ class WarpProcessService : Service() {
         const val EXTRA_TEXT = "extra_text"
         const val EXTRA_PROMPT_ID = "extra_prompt_id"
         const val EXTRA_IMAGE_BYTES = "extra_image_bytes"
-        const val EXTRA_IMAGE_URI = "extra_image_uri"
+        const val EXTRA_IMAGE_URI = "extra_image_uri" // legacy for image-only input
+        const val EXTRA_ATTACHMENT_URI = "extra_attachment_uri"
+        const val EXTRA_ATTACHMENT_MIME = "extra_attachment_mime"
 
         const val ACTION_COPY_IMAGE = "org.parkjw.capywarp.action.COPY_IMAGE"
         const val ACTION_SAVE_IMAGE = "org.parkjw.capywarp.action.SAVE_IMAGE"

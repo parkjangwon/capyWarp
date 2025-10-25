@@ -44,11 +44,25 @@
                 <data android:mimeType="text/plain" />
                 <data android:mimeType="text/*" />
             </intent-filter>
-            <!-- Receive shared images from other apps -->
+            <!-- Receive shared files from other apps -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <!-- Images -->
                 <data android:mimeType="image/*" />
+                <!-- Documents and text -->
+                <data android:mimeType="application/pdf" />
+                <data android:mimeType="text/plain" />
+                <data android:mimeType="text/*" />
+                <!-- Some file managers share TXT/others as generic octet-stream -->
+                <data android:mimeType="application/octet-stream" />
+                <!-- Office formats (old + new) -->
+                <data android:mimeType="application/msword" />
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                <data android:mimeType="application/vnd.ms-excel" />
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+                <data android:mimeType="application/vnd.ms-powerpoint" />
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.presentationml.presentation" />
             </intent-filter>
         </activity>
 

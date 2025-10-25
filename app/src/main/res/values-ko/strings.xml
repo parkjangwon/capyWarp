@@ -32,6 +32,7 @@
     <string name="selected_text_show">선택한 텍스트 보기</string>
     <string name="selected_text_hide">선택한 텍스트 숨기기</string>
     <string name="image_attached">이미지 첨부됨: %1$s</string>
+    <string name="file_attached">파일 첨부됨: %1$s</string>
     <string name="no_matching_prompt">일치하는 프롬프트가 없습니다.</string>
 
     <!-- Notifications / service -->

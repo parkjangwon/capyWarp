@@ -32,6 +32,7 @@
     <string name="selected_text_show">Show selected text</string>
     <string name="selected_text_hide">Hide selected text</string>
     <string name="image_attached">Image attached: %1$s</string>
+    <string name="file_attached">File attached: %1$s</string>
     <string name="no_matching_prompt">No matching prompts.</string>
 
     <!-- Notifications / service -->

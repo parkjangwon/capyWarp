@@ -32,7 +32,7 @@ class GeminiRepository @Inject constructor(
         return line
     }
 
-    suspend fun generateContent(text: String, prompt: Prompt, imageBytes: ByteArray? = null): String {
+    suspend fun generateContent(text: String, prompt: Prompt, attachmentBytes: ByteArray? = null, attachmentMime: String? = null): String {
         // API 키 사전 점검
         val apiKey = settingsRepository.getApiKey()
         if (apiKey.isBlank()) {
@@ -64,9 +64,10 @@ class GeminiRepository @Inject constructor(
             }
         }
 
-        val hasInputImage = imageBytes != null
+        val hasAttachment = attachmentBytes != null
         val isImageOutput = prompt.outputType == 1
-        val isImageMode = isImageOutput || hasInputImage
+        val isImageInput = (attachmentMime ?: "").startsWith("image/") && hasAttachment
+        val isImageMode = isImageOutput || isImageInput
         // 이미지 출력 요청은 v1beta generateContent에서 바이너리 MIME 응답을 허용하지 않으므로,
         // 모델이 텍스트로 data URI 한 줄만 반환하도록 지시한다.
         val finalPrompt = if (isImageOutput) buildString {
@@ -86,15 +87,38 @@ class GeminiRepository @Inject constructor(
         } else finalPrompt
 
         val parts = buildList {
-            if (hasInputImage) {
-                add(
-                    GeminiPart(
-                        inlineData = InlineData(
-                            mimeType = "image/png",
-                            data = android.util.Base64.encodeToString(imageBytes, android.util.Base64.NO_WRAP)
+            if (hasAttachment) {
+                val mime = (attachmentMime ?: "application/octet-stream")
+                val b64 = android.util.Base64.encodeToString(attachmentBytes, android.util.Base64.NO_WRAP)
+                val inlineSupported = mime.startsWith("image/") ||
+                        mime == "application/pdf" ||
+                        mime.startsWith("text/") ||
+                        mime == "application/json"
+                if (inlineSupported) {
+                    // Use inlineData for supported MIME types
+                    add(
+                        GeminiPart(
+                            inlineData = InlineData(
+                                mimeType = mime,
+                                data = b64
+                            )
                         )
                     )
-                )
+                } else {
+                    // Fallback for Office and other unsupported types: provide as Base64 text
+                    // so the model can still reason about the content.
+                    add(
+                        GeminiPart(
+                            text = buildString {
+                                appendLine("An attachment is included but the MIME is not supported by inline data: ${mime}.")
+                                appendLine("The following is the Base64 content between the markers. If possible, decode and extract text to summarize or answer the user query.")
+                                appendLine("BEGIN_BASE64 ${mime}")
+                                appendLine(b64)
+                                appendLine("END_BASE64")
+                            }
+                        )
+                    )
+                }
             }
             add(GeminiPart(text = mergedPrompt))
         }

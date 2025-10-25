@@ -45,11 +45,11 @@ It works from anywhere using the Android share sheet (for images) or the text se
 2.  In the context menu (⋮), tap **'Warp!'**.
 3.  Search or pick a prompt from the floating panel that appears.
 
-### 2. Process an Image (Share Sheet)
+### 2. Process a File via Share Sheet (Images, PDFs, Office docs, TXT)
 
-1.  From your Gallery, Photos, or any app, tap the 'Share' button on an image.
+1.  From any app (Gallery, Files, Docs, Drive, Mail, etc.), tap the Share button on a file.
 2.  Select **'CapyWarp'** from the system share sheet.
-3.  Pick a prompt that is configured to accept image input.
+3.  Pick a prompt. If the shared file is an image, choose an image-capable prompt as needed. Non-image files are sent to the model as inline data with the correct MIME type.
 
 Once the AI processing is complete, the result is delivered instantly according to that prompt's settings (notification, clipboard, etc.).
 

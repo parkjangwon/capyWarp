@@ -172,7 +172,8 @@ class WarpRouterActivity : ComponentActivity() {
             else -> null
         } ?: ""
 
-        val sharedImageUri: android.net.Uri? = if (action == Intent.ACTION_SEND && type?.startsWith("image/") == true) {
+        // Generic shared stream (image, pdf, office docs, txt, etc.)
+        val sharedStreamUri: android.net.Uri? = if (action == Intent.ACTION_SEND) {
             if (android.os.Build.VERSION.SDK_INT >= 33) {
                 intent.getParcelableExtra(Intent.EXTRA_STREAM, android.net.Uri::class.java)
             } else {
@@ -180,6 +181,7 @@ class WarpRouterActivity : ComponentActivity() {
                 intent.getParcelableExtra(Intent.EXTRA_STREAM) as? android.net.Uri
             }
         } else null
+        val sharedMimeType: String? = type
 
         setContent {
             val promptListViewModel: PromptListViewModel = hiltViewModel()
@@ -283,15 +285,20 @@ class WarpRouterActivity : ComponentActivity() {
                                 }
                             }
 
-                            if (sharedImageUri != null) {
+                            if (sharedStreamUri != null) {
                                 Surface(
                                     tonalElevation = 1.dp,
                                     shape = MaterialTheme.shapes.medium,
                                     color = Color(0xFF1F2A1F),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
+                                    val label = if ((sharedMimeType ?: "").startsWith("image/")) {
+                                        androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.image_attached, sharedStreamUri.toString())
+                                    } else {
+                                        androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.file_attached, sharedStreamUri.toString())
+                                    }
                                     Text(
-                                        text = androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.image_attached, sharedImageUri.toString()),
+                                        text = label,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = Color(0xFFB7E4C7),
                                         modifier = Modifier.padding(12.dp)
@@ -337,11 +344,14 @@ class WarpRouterActivity : ComponentActivity() {
                                                 val svc = Intent(this@WarpRouterActivity, WarpProcessService::class.java)
                                                 svc.putExtra(WarpProcessService.EXTRA_TEXT, selectedText)
                                                 svc.putExtra(WarpProcessService.EXTRA_PROMPT_ID, prompt.id)
-                                                if (sharedImageUri != null) {
-                                                    svc.putExtra(WarpProcessService.EXTRA_IMAGE_URI, sharedImageUri)
+                                                if (sharedStreamUri != null) {
+                                                    svc.putExtra(WarpProcessService.EXTRA_ATTACHMENT_URI, sharedStreamUri)
+                                                    if (!sharedMimeType.isNullOrBlank()) {
+                                                        svc.putExtra(WarpProcessService.EXTRA_ATTACHMENT_MIME, sharedMimeType)
+                                                    }
                                                     svc.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                                     // also grant to service explicitly
-                                                    try { grantUriPermission(packageName, sharedImageUri, Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_: Exception) {}
+                                                    try { grantUriPermission(packageName, sharedStreamUri, Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_: Exception) {}
                                                 }
                                                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                                                     startForegroundService(svc)
