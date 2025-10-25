@@ -44,13 +44,15 @@ class PromptListViewModel @Inject constructor(
             try {
                 val src = repository.getPrompt(id) ?: return@launch
                 val all = repository.getAllPrompts().sortedBy { it.order }
-                val baseTitle = src.title.ifBlank { "Prompt" }
-                var newTitle = baseTitle + " Copy"
-                var suffix = 2
+                val candidateBase = (src.title.ifBlank { "Prompt" }) + " Copy"
+                var newTitle = candidateBase
                 val existingTitles = all.map { it.title }.toSet()
-                while (existingTitles.contains(newTitle)) {
-                    newTitle = "$baseTitle ($suffix)"
-                    suffix++
+                if (existingTitles.contains(newTitle)) {
+                    var n = 2
+                    while (existingTitles.contains("$candidateBase $n")) {
+                        n++
+                    }
+                    newTitle = "$candidateBase $n"
                 }
                 val insertIndex = all.indexOfFirst { it.id == id }.coerceAtLeast(0) + 1
                 val adjusted = all.mapIndexed { idx, p ->
