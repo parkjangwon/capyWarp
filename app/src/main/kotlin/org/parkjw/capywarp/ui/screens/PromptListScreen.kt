@@ -152,17 +152,9 @@ fun PromptListScreen(
         } else {
             val listState = rememberLazyListState()
             val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
-            var firstMoveHandled by remember { mutableStateOf(false) }
             val reorderState = rememberReorderableLazyListState(
                 listState = listState,
                 onMove = { from, to ->
-                    // On the first move, enter selection mode and select the dragged item
-                    if (!firstMoveHandled) {
-                        firstMoveHandled = true
-                        if (!selectionMode) selectionMode = true
-                        selectedIds = setOf(localList.getOrNull(from.index)?.id ?: 0)
-                        try { haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress) } catch (_: Exception) {}
-                    }
                     // In-place mutate the SnapshotStateList to avoid recomposition churn
                     if (from.index != to.index && from.index in 0 until localList.size && to.index in 0..localList.size) {
                         val moved = localList.removeAt(from.index)
@@ -172,7 +164,6 @@ fun PromptListScreen(
                     try { haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove) } catch (_: Exception) {}
                 },
                 onDragEnd = { _, _ ->
-                    firstMoveHandled = false
                     viewModel.persistOrder(localList)
                 }
             )
@@ -185,6 +176,14 @@ fun PromptListScreen(
                 items(localList, key = { it.id }) { prompt ->
                     val checked = selectedIds.contains(prompt.id)
                     ReorderableItem(reorderState, key = prompt.id) { isDragging ->
+                        // When dragging starts (after long‑press), immediately enter selection mode
+                        LaunchedEffect(isDragging) {
+                            if (isDragging) {
+                                if (!selectionMode) selectionMode = true
+                                selectedIds = setOf(prompt.id)
+                                try { haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress) } catch (_: Exception) {}
+                            }
+                        }
                         ListItem(
                             headlineContent = { Text(prompt.title) },
                             supportingContent = {

@@ -166,9 +166,23 @@ fun SettingsScreen(
             // 3) User prompt
             Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.settings_user_prompt_section), style = MaterialTheme.typography.titleMedium)
             val userPrompt by viewModel.userPrompt.collectAsState()
+            // Use local buffered state to avoid IME glitches caused by immediate DataStore writes
+            var localUserPrompt by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(userPrompt) }
+            // Keep local state in sync when settings change externally (e.g., restore)
+            LaunchedEffect(userPrompt) {
+                if (userPrompt != localUserPrompt) localUserPrompt = userPrompt
+            }
+            var saveJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
             OutlinedTextField(
-                value = userPrompt,
-                onValueChange = viewModel::setUserPrompt,
+                value = localUserPrompt,
+                onValueChange = { v ->
+                    localUserPrompt = v
+                    saveJob?.cancel()
+                    saveJob = scope.launch {
+                        kotlinx.coroutines.delay(200)
+                        viewModel.setUserPrompt(v)
+                    }
+                },
                 label = { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.settings_user_prompt_label)) },
                 supportingText = { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.settings_user_prompt_support)) },
                 minLines = 4,

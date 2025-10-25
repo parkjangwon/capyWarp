@@ -38,9 +38,44 @@ class GeminiRepository @Inject constructor(
         if (apiKey.isBlank()) {
             throw Exception("Gemini API 키가 설정되어 있지 않습니다. 설정 화면에서 키를 입력해 주세요.")
         }
+        // 템플릿 내 $TEXT 처리: 다중 토큰은 첫 번째만 치환, 나머지는 제거. 이스케이프(\\$TEXT, $$TEXT)는 리터럴로 유지.
+        fun renderTemplateWithText(template: String, selected: String): Pair<String, Boolean> {
+            val ESC1 = "__LITERAL_DOLLAR_TEXT__"
+            val ESC2 = "__LITERAL_DOLLAR_TEXT2__"
+            // 1) 이스케이프된 토큰을 임시 치환하여 보호
+            var temp = template
+                .replace(Regex("""\\\${'$'}TEXT"""), ESC1) // \$TEXT
+                .replace(Regex("""\${'$'}\${'$'}TEXT"""), ESC2)    // $$TEXT
+            // 2) 이스케이프되지 않은 토큰 탐지(바로 앞 문자가 \\ 또는 $ 가 아닌 경우만)
+            val tokenRegex = Regex("""(?<![\\${'$'}])\${'$'}TEXT""")
+            val matches = tokenRegex.findAll(temp).toList()
+            if (matches.isEmpty()) {
+                // 원상 복구 후, 토큰 없음 처리
+                val restored = temp.replace(ESC1, "\$TEXT").replace(ESC2, "\$TEXT")
+                return restored to false
+            }
+            // 3) 첫 번째만 치환, 나머지는 제거
+            val sb = StringBuilder()
+            var lastIndex = 0
+            var seen = 0
+            for (m in matches) {
+                sb.append(temp.substring(lastIndex, m.range.first))
+                if (seen == 0) sb.append(selected) // 첫 번째 치환
+                // else: 제거(아무 것도 추가하지 않음)
+                lastIndex = m.range.last + 1
+                seen++
+            }
+            sb.append(temp.substring(lastIndex))
+            var out = sb.toString()
+            // 4) 이스케이프 리터럴 복구
+            out = out.replace(ESC1, "\$TEXT").replace(ESC2, "\$TEXT")
+            return out to true
+        }
+
         // $TEXT 플레이스홀더가 없으면 전역 설정에 따라 선택 텍스트를 자동 첨부합니다.
-        val basePrompt = if (prompt.template.contains("\$TEXT")) {
-            prompt.template.replace("\$TEXT", text)
+        val (renderedTemplate, hadToken) = renderTemplateWithText(prompt.template, text)
+        val basePrompt = if (hadToken) {
+            renderedTemplate
         } else {
             val autoAttach = try { settingsRepository.autoAttachSelectedText.first() } catch (_: Exception) { true }
             val position = try { settingsRepository.autoAttachPosition.first() } catch (_: Exception) { "top" }

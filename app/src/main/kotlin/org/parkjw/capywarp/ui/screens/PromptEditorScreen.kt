@@ -56,9 +56,26 @@ fun PromptEditorScreen(
                         label = { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.editor_prompt_name)) },
                         modifier = Modifier.fillMaxWidth()
                     )
+                    // Template field with cursor-aware insertion support
+                    val templateFieldState = androidx.compose.runtime.saveable.rememberSaveable(stateSaver = androidx.compose.ui.text.input.TextFieldValue.Saver) {
+                        androidx.compose.runtime.mutableStateOf(androidx.compose.ui.text.input.TextFieldValue(state.template))
+                    }
+                    // Sync local field when VM state changes from elsewhere (e.g., load)
+                    androidx.compose.runtime.LaunchedEffect(state.template) {
+                        val current = templateFieldState.value
+                        if (current.text != state.template) {
+                            templateFieldState.value = current.copy(
+                                text = state.template,
+                                selection = androidx.compose.ui.text.TextRange(state.template.length)
+                            )
+                        }
+                    }
                     OutlinedTextField(
-                        value = state.template,
-                        onValueChange = viewModel::updateTemplate,
+                        value = templateFieldState.value,
+                        onValueChange = { v: androidx.compose.ui.text.input.TextFieldValue ->
+                            templateFieldState.value = v
+                            viewModel.updateTemplate(v.text)
+                        },
                         label = { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.editor_prompt_template)) },
                         supportingText = { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.editor_prompt_template_help)) },
                         minLines = 5,
@@ -67,8 +84,21 @@ fun PromptEditorScreen(
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                         TextButton(onClick = {
                             val token = "\$TEXT"
-                            val newTemplate = if (state.template.isBlank()) token else state.template + (if (state.template.last().isWhitespace()) "" else " ") + token
-                            viewModel.updateTemplate(newTemplate)
+                            val current = templateFieldState.value
+                            val sel = current.selection
+                            val start = sel.start.coerceIn(0, current.text.length)
+                            val end = sel.end.coerceIn(0, current.text.length)
+                            val newText = buildString {
+                                append(current.text.substring(0, minOf(start, end)))
+                                append(token)
+                                append(current.text.substring(maxOf(start, end)))
+                            }
+                            val newCursor = minOf(start, end) + token.length
+                            templateFieldState.value = androidx.compose.ui.text.input.TextFieldValue(
+                                text = newText,
+                                selection = androidx.compose.ui.text.TextRange(newCursor)
+                            )
+                            viewModel.updateTemplate(newText)
                         }) {
                             Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.editor_insert_text_token))
                         }
