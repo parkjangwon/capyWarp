@@ -136,7 +136,15 @@ class SettingsViewModel @Inject constructor(
                     autoAttachSelectedText = autoAttachSelectedText.first(),
                     autoAttachPosition = autoAttachPosition.first()
                 )
-                val payload = BackupPayload(all, settingsData)
+                val payload = BackupPayload(
+                    prompts = all,
+                    settings = settingsData,
+                    meta = org.parkjw.capywarp.data.model.BackupMeta(
+                        appVersionName = org.parkjw.capywarp.BuildConfig.VERSION_NAME,
+                        appVersionCode = org.parkjw.capywarp.BuildConfig.VERSION_CODE,
+                        dbVersion = 2
+                    )
+                )
                 val json = Json { prettyPrint = true }
                 val data = json.encodeToString(payload)
                 resolver.openOutputStream(uri)?.use { out ->

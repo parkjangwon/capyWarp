@@ -15,7 +15,15 @@ data class SettingsData(
 )
 
 @Serializable
+data class BackupMeta(
+    val appVersionName: String,
+    val appVersionCode: Int,
+    val dbVersion: Int
+)
+
+@Serializable
 data class BackupPayload(
     val prompts: List<Prompt>,
-    val settings: SettingsData
+    val settings: SettingsData,
+    val meta: BackupMeta? = null
 )

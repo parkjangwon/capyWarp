@@ -24,7 +24,7 @@ It works from anywhere using the Android share sheet (for images) or the text se
 
 ### 🧩 Prompt List
 
-* **Reorder Mode (Top‑right)**: Tap the Reorder icon in the top‑right to enter reorder mode. Use the Up/Down buttons on each item to move it. Changes are saved immediately and persist.
+* **Drag to Reorder (Long‑press)**: Long‑press a list item and, without lifting your finger, drag it up or down to change its position. You’ll feel a subtle haptic tick each time you cross an item. Release to save; order persists.
 * **Multi‑select Actions in App Bar**: Long‑press an item to select. When one item is selected, a Duplicate icon appears; when one or more are selected, a Delete icon appears. No bottom text buttons — all actions are in the top app bar.
 
 ### ⚙️ User Customization
@@ -71,7 +71,7 @@ Define prompts to automate your custom AI tasks by giving each a name and a temp
 * **Image Model**: Select the model used when prompts include images (input or output).
 * **User Prompt (Global)**: A persistent instruction merged into every request (e.g., "Always reply in casual English").
 * **Theme**: System / Light / Dark
-* **Backup & Restore**: Export or import your prompts and settings as a JSON file.
+* **Backup & Restore**: Export or import your prompts and settings as a JSON file. The backup also includes metadata (app version, build, DB version) for future compatibility.
 
 ## 🔒 Permissions & Privacy
 
