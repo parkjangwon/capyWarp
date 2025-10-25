@@ -1,0 +1,108 @@
+<resources>
+    <string name="app_name">CapyWarp</string>
+    <string name="warp_action_label">Warp!</string>
+
+    <string name="close">Close</string>
+    <string name="search">Search</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="confirm_delete_title">Delete confirmation</string>
+    <string name="confirm_delete_message">Delete %1$d selected prompt(s)?</string>
+    <string name="no_prompts_message">No prompts yet. Tap the New prompt button to add one.</string>
+    <string name="new_prompt">New prompt</string>
+    <string name="copied_to_clipboard">Copied to clipboard.</string>
+    <string name="copy_failed">Copy failed: %1$s</string>
+    <string name="press_back_again_to_exit">Press back again to exit</string>
+    <string name="settings">Settings</string>
+
+    <string name="action_copy_to_clipboard">Copy to clipboard</string>
+    <string name="action_show_notification">Show notification</string>
+    <string name="action_process_result">Process result</string>
+    <string name="action_show_notification_image">Show notification (image)</string>
+    <string name="action_save_gallery">Save to gallery</string>
+    <string name="action_share">Share</string>
+    <string name="type_text">Text</string>
+    <string name="type_image">Image</string>
+
+    <string name="selected_text_show">Show selected text</string>
+    <string name="selected_text_hide">Hide selected text</string>
+    <string name="image_attached">Image attached: %1$s</string>
+    <string name="no_matching_prompt">No matching prompts.</string>
+
+    <string name="notif_channel_name">AI Results</string>
+    <string name="notif_processing_title">Warp! processing…</string>
+    <string name="notif_processing_text">AI is generating the result</string>
+    <string name="notif_result_title">Warp! result</string>
+    <string name="notif_image_result_title">Warp! image result</string>
+    <string name="notif_image_result_text">Check the generated image</string>
+    <string name="notif_processing_retry_text">AI is generating the result (retry %1$d/%2$d)</string>
+    <string name="notif_failure_title">Warp! failed</string>
+    <string name="share_text_title">Share text</string>
+    <string name="share_image_title">Share image</string>
+    <string name="toast_copy_text">Text copied to clipboard.</string>
+    <string name="toast_copy_image">Image copied to clipboard.</string>
+    <string name="toast_copy_image_failed">Failed to copy to clipboard: %1$s</string>
+    <string name="toast_no_text_to_copy">No text to copy.</string>
+    <string name="toast_no_image_uri">No image URI.</string>
+    <string name="toast_saved_to_gallery">Saved to gallery.</string>
+    <string name="toast_save_gallery_failed">Failed to save to gallery.</string>
+    <string name="toast_data_too_large">Data too large to process. Save to gallery failed.</string>
+    <string name="toast_cannot_read_image">Cannot read image data.</string>
+    <string name="toast_share_error">Error while sharing: %1$s</string>
+    <string name="toast_no_post_noti_perm">Notification permission denied. Cannot show notifications.</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_theme_section">Theme</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_gemini_section">Gemini API</string>
+    <string name="settings_api_key_label">Gemini API Key</string>
+    <string name="settings_model_label">Gemini model</string>
+    <string name="settings_image_model_label">Image model</string>
+    <string name="settings_tip_title">Tip</string>
+    <string name="settings_tip_free_plan">On the free plan, requests per minute are limited. The app retries automatically with a short delay when limits are hit.</string>
+    <string name="settings_user_prompt_section">User prompt (always applied)</string>
+    <string name="settings_user_prompt_label">Always include this instruction</string>
+    <string name="settings_user_prompt_support">Example: Please always answer in Korean politely.</string>
+    <string name="settings_backup_section">Backup &amp; Restore</string>
+    <string name="settings_backup_create">Create backup</string>
+    <string name="settings_backup_restore">Restore backup</string>
+    <string name="settings_theme_choose">Choose theme</string>
+    <string name="settings_model_choose">Choose model</string>
+    <string name="settings_image_model_choose">Choose image model</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_choose">Choose language</string>
+    <string name="settings_auto_attach">Auto-attach selected text</string>
+    <string name="settings_auto_attach_position">Attach position</string>
+    <string name="settings_attach_top">Top</string>
+    <string name="settings_attach_bottom">Bottom</string>
+
+    <string name="duplicate">Duplicate</string>
+    
+    <string name="editor_title">Prompt editor</string>
+    <string name="editor_insert_text_token">Insert $TEXT</string>
+    <string name="editor_prompt_name">Prompt name</string>
+    <string name="editor_prompt_template">Prompt template</string>
+    <string name="editor_prompt_template_help">Help: Selected text will be inserted at $TEXT.</string>
+    <string name="editor_action_notify">Show notification</string>
+    <string name="editor_action_clipboard">Copy to clipboard</string>
+    <string name="editor_action_notify_image">Show notification</string>
+    <string name="editor_action_save_gallery">Save to gallery</string>
+    <string name="editor_output_text">Text</string>
+    <string name="editor_output_image">Image</string>
+
+    <string name="settings_api_hint">Enter your Gemini API key to enable AI processing.</string>
+    <string name="settings_api_get_key">Get an API key from Google AI Studio: https://makersuite.google.com/app/apikey</string>
+    <string name="settings_model_tip">Choose the Gemini model to use for analysis.</string>
+    <string name="settings_backup_desc">Back up all data including prompts and settings.</string>
+    <string name="settings_app_version">App version</string>
+    <string name="settings_version_detail">Version %1$s (Build %2$d)</string>
+
+    <string name="editor_section_response_format">Response format</string>
+    <string name="editor_section_result_action">Result handling</string>
+
+    <string name="error_prompt_not_found">Prompt not found.</string>
+</resources>

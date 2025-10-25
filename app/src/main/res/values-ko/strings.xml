@@ -1,0 +1,119 @@
+<resources>
+    <!-- App -->
+    <string name="app_name">CapyWarp</string>
+    <string name="warp_action_label">Warp!</string>
+
+    <!-- Common -->
+    <string name="close">닫기</string>
+    <string name="search">검색</string>
+    <string name="ok">확인</string>
+    <string name="cancel">취소</string>
+    <string name="delete">삭제</string>
+    <string name="confirm_delete_title">삭제 확인</string>
+    <string name="confirm_delete_message">선택한 프롬프트 %1$d개를 삭제할까요?</string>
+    <string name="no_prompts_message">아직 프롬프트가 없습니다. 새 프롬프트 버튼을 눌러 추가하세요.</string>
+    <string name="new_prompt">새 프롬프트</string>
+    <string name="copied_to_clipboard">클립보드에 복사되었습니다.</string>
+    <string name="copy_failed">복사 실패: %1$s</string>
+    <string name="press_back_again_to_exit">뒤로가기를 한 번 더 누르면 종료합니다</string>
+    <string name="settings">설정</string>
+
+    <!-- Prompt actions / types -->
+    <string name="action_copy_to_clipboard">클립보드로 복사</string>
+    <string name="action_show_notification">알림으로 표시</string>
+    <string name="action_process_result">결과 처리</string>
+    <string name="action_show_notification_image">알림으로 표시(이미지)</string>
+    <string name="action_save_gallery">갤러리에 저장</string>
+    <string name="action_share">공유</string>
+    <string name="type_text">텍스트</string>
+    <string name="type_image">이미지</string>
+
+    <!-- Router overlay -->
+    <string name="selected_text_show">선택한 텍스트 보기</string>
+    <string name="selected_text_hide">선택한 텍스트 숨기기</string>
+    <string name="image_attached">이미지 첨부됨: %1$s</string>
+    <string name="no_matching_prompt">일치하는 프롬프트가 없습니다.</string>
+
+    <!-- Notifications / service -->
+    <string name="notif_channel_name">AI 결과</string>
+    <string name="notif_processing_title">Warp! 처리 중…</string>
+    <string name="notif_processing_text">AI가 결과를 생성하는 중입니다</string>
+    <string name="notif_result_title">Warp! 결과</string>
+    <string name="notif_image_result_title">Warp! 이미지 결과</string>
+    <string name="notif_image_result_text">생성된 이미지를 확인하세요</string>
+    <string name="notif_processing_retry_text">AI가 결과를 생성하는 중입니다 (재시도 %1$d/%2$d)</string>
+    <string name="notif_failure_title">Warp! 실패</string>
+    <string name="share_text_title">텍스트 공유</string>
+    <string name="share_image_title">이미지 공유</string>
+    <string name="toast_copy_text">텍스트가 클립보드에 복사되었습니다.</string>
+    <string name="toast_copy_image">이미지가 클립보드에 복사되었습니다.</string>
+    <string name="toast_copy_image_failed">클립보드 복사 실패: %1$s</string>
+    <string name="toast_no_text_to_copy">복사할 텍스트가 없습니다.</string>
+    <string name="toast_no_image_uri">이미지 URI가 없습니다.</string>
+    <string name="toast_saved_to_gallery">갤러리에 저장되었습니다.</string>
+    <string name="toast_save_gallery_failed">갤러리에 저장하지 못했습니다.</string>
+    <string name="toast_data_too_large">처리 데이터가 너무 큽니다. 갤러리 저장 실패.</string>
+    <string name="toast_cannot_read_image">이미지 데이터를 읽을 수 없습니다.</string>
+    <string name="toast_share_error">공유 중 오류: %1$s</string>
+    <string name="toast_no_post_noti_perm">알림 권한이 거부되어 알림을 표시할 수 없습니다.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">설정</string>
+    <string name="settings_theme_section">테마</string>
+    <string name="settings_theme">테마</string>
+    <string name="settings_theme_system">시스템</string>
+    <string name="settings_theme_light">라이트</string>
+    <string name="settings_theme_dark">다크</string>
+    <string name="settings_gemini_section">Gemini API</string>
+    <string name="settings_api_key_label">Gemini API 키</string>
+    <string name="settings_model_label">Gemini 모델</string>
+    <string name="settings_image_model_label">이미지 모델</string>
+    <string name="settings_tip_title">팁</string>
+    <string name="settings_tip_free_plan">무료 플랜에서는 분당 요청이 제한됩니다. 앱은 제한에 도달하면 자동으로 짧은 지연 후 재시도합니다.</string>
+    <string name="settings_user_prompt_section">사용자 프롬프트(항상 적용)</string>
+    <string name="settings_user_prompt_label">항상 포함할 지시문</string>
+    <string name="settings_user_prompt_support">예: 항상 공손한 한국어로 답변해 주세요.</string>
+    <string name="settings_backup_section">백업 및 복원</string>
+    <string name="settings_backup_create">백업 만들기</string>
+    <string name="settings_backup_restore">백업 복원</string>
+    <string name="settings_theme_choose">테마 선택</string>
+    <string name="settings_model_choose">모델 선택</string>
+    <string name="settings_image_model_choose">이미지 모델 선택</string>
+    <string name="settings_language">언어</string>
+    <string name="settings_language_choose">언어 선택</string>
+    <string name="settings_auto_attach">선택한 텍스트 자동 첨부</string>
+    <string name="settings_auto_attach_position">첨부 위치</string>
+    <string name="settings_attach_top">상단</string>
+    <string name="settings_attach_bottom">하단</string>
+
+    <!-- Prompt list actions -->
+    <string name="duplicate">복제</string>
+
+    <!-- Prompt editor -->
+    <string name="editor_title">프롬프트 편집기</string>
+    <string name="editor_prompt_name">프롬프트 이름</string>
+    <string name="editor_prompt_template">프롬프트 템플릿</string>
+    <string name="editor_prompt_template_help">도움말: 선택한 텍스트는 $TEXT 위치에 삽입됩니다.</string>
+    <string name="editor_insert_text_token">$TEXT 삽입</string>
+    <string name="editor_action_notify">알림으로 표시</string>
+    <string name="editor_action_clipboard">클립보드로 복사</string>
+    <string name="editor_action_notify_image">알림으로 표시</string>
+    <string name="editor_action_save_gallery">갤러리에 저장</string>
+    <string name="editor_output_text">텍스트</string>
+    <string name="editor_output_image">이미지</string>
+
+    <!-- Settings extra texts -->
+    <string name="settings_api_hint">Gemini API 키를 입력하면 AI 처리가 활성화됩니다.</string>
+    <string name="settings_api_get_key">Google AI Studio에서 API 키를 발급받으세요: https://makersuite.google.com/app/apikey</string>
+    <string name="settings_model_tip">분석에 사용할 Gemini 모델을 선택하세요.</string>
+    <string name="settings_backup_desc">프롬프트와 설정을 포함한 모든 데이터를 백업합니다.</string>
+    <string name="settings_app_version">앱 버전</string>
+    <string name="settings_version_detail">버전 %1$s (빌드 %2$d)</string>
+
+    <!-- Editor sections -->
+    <string name="editor_section_response_format">응답 형식</string>
+    <string name="editor_section_result_action">결과 처리</string>
+
+    <!-- Errors -->
+    <string name="error_prompt_not_found">프롬프트를 찾을 수 없습니다.</string>
+</resources>
