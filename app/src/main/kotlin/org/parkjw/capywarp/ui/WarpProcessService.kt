@@ -1,5 +1,14 @@
 package org.parkjw.capywarp.ui
 
+import android.util.Log
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.preferencesDataStoreFile
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
+
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -25,9 +34,27 @@ import org.parkjw.capywarp.domain.repository.PromptRepository
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class WarpProcessService : Service() { 
+class WarpProcessService : Service() {
+    private fun resolveIsDarkForOverlay(appCtx: Context): Boolean {
+        return try {
+            val themeValue = settingsRepository.getThemeSync()
+            val osNight = (appCtx.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+            val result = when (themeValue) {
+                "light" -> false
+                "dark" -> true
+                else -> osNight
+            }
+            Log.d("CapyWarp/WarpServiceTheme", "resolveIsDarkForOverlay(sync): themeValue=" + themeValue + ", osNight=" + osNight + ", result=" + result)
+            result
+        } catch (e: Exception) {
+            val osNight = (appCtx.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+            Log.w("CapyWarp/WarpServiceTheme", "resolveIsDarkForOverlay fallback due to ${e.message}; osNight=" + osNight)
+            osNight
+        }
+    }
     @Inject lateinit var promptRepository: PromptRepository
     @Inject lateinit var geminiRepository: GeminiRepository
+    @Inject lateinit var settingsRepository: org.parkjw.capywarp.domain.repository.SettingsRepository
 
     private val serviceScope = CoroutineScope(Dispatchers.Default + Job())
 
@@ -221,7 +248,9 @@ class WarpProcessService : Service() {
                             4 -> {
                                 // External overlay popup only (no Activity fallback)
                                 serviceScope.launch(Dispatchers.Main) {
-                                    try { OverlayPopupManager.showText(this@WarpProcessService, result) } catch (_: Exception) {}
+                                    val resolved = resolveIsDarkForOverlay(applicationContext)
+                                    Log.d("CapyWarp/WarpServiceTheme", "launch overlay (text): osNight=" + ((resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES) + ", resolved.isDark=" + resolved)
+                                    try { OverlayPopupManager.showText(this@WarpProcessService, result, resolved) } catch (_: Exception) {}
                                 }
                             }
                             else -> {
@@ -320,7 +349,9 @@ class WarpProcessService : Service() {
                             if (prompt.resultAction == 4 && uri != null) {
                                 // External overlay popup only (no Activity fallback)
                                 serviceScope.launch(Dispatchers.Main) {
-                                    try { OverlayPopupManager.showImage(this@WarpProcessService, uri) } catch (_: Exception) {}
+                                    val resolved = resolveIsDarkForOverlay(applicationContext)
+                                    Log.d("CapyWarp/WarpServiceTheme", "launch overlay (image): osNight=" + ((resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES) + ", resolved.isDark=" + resolved)
+                                    try { OverlayPopupManager.showImage(this@WarpProcessService, uri, resolved) } catch (_: Exception) {}
                                 }
                             } else {
                                 val copyIntent = Intent(this@WarpProcessService, WarpProcessService::class.java).apply {
@@ -379,7 +410,9 @@ class WarpProcessService : Service() {
                                 if (prompt.resultAction == 4) {
                                     // External overlay popup only (no Activity fallback)
                                     serviceScope.launch(Dispatchers.Main) {
-                                        try { OverlayPopupManager.showText(this@WarpProcessService, textResult) } catch (_: Exception) {}
+                                        val resolved = resolveIsDarkForOverlay(applicationContext)
+                                        Log.d("CapyWarp/WarpServiceTheme", "launch overlay (text fallback): osNight=" + ((resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES) + ", resolved.isDark=" + resolved)
+                                        try { OverlayPopupManager.showText(this@WarpProcessService, textResult, resolved) } catch (_: Exception) {}
                                     }
                                 } else {
                                     val copyTextIntent = Intent(this@WarpProcessService, WarpProcessService::class.java).apply {

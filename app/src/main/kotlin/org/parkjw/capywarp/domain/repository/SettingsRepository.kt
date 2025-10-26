@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,6 +26,8 @@ class SettingsRepository @Inject constructor(
         private val AUTO_ATTACH_KEY = booleanPreferencesKey("auto_attach_selected_text")
         private val AUTO_ATTACH_POS_KEY = stringPreferencesKey("auto_attach_position")
         private const val API_KEY = "gemini_api_key"
+        // Synchronous mirror for theme to avoid first-frame race in services/overlays
+        private const val THEME_MIRROR_KEY = "theme_mirror"
     }
 
     val theme: Flow<String> = dataStore.data.map { it[THEME_KEY] ?: "system" }
@@ -42,7 +45,26 @@ class SettingsRepository @Inject constructor(
     val autoAttachPosition: Flow<String> = dataStore.data.map { it[AUTO_ATTACH_POS_KEY] ?: "top" }
 
     suspend fun setTheme(theme: String) {
+        // Persist to DataStore (reactive) and mirror to SharedPreferences (sync)
         dataStore.edit { it[THEME_KEY] = theme }
+        securePrefs.edit().putString(THEME_MIRROR_KEY, theme).apply()
+    }
+
+    fun getThemeSync(): String {
+        // 1) Try fast SharedPreferences mirror
+        val mirrored = securePrefs.getString(THEME_MIRROR_KEY, null)
+        if (!mirrored.isNullOrBlank()) return mirrored
+        // 2) Fallback to DataStore (blocking read) and backfill mirror
+        return try {
+            val key = THEME_KEY
+            val value = kotlinx.coroutines.runBlocking {
+                dataStore.data.map { it[key] ?: "system" }.first()
+            }
+            securePrefs.edit().putString(THEME_MIRROR_KEY, value).apply()
+            value
+        } catch (_: Exception) {
+            "system"
+        }
     }
 
     suspend fun setLanguage(language: String) {

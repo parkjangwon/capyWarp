@@ -7,6 +7,7 @@ import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -15,6 +16,13 @@ import android.widget.ScrollView
 import androidx.core.content.ContextCompat
 import io.noties.markwon.Markwon
 import android.text.method.LinkMovementMethod
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.preferencesDataStoreFile
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 
 /**
  * Lightweight system overlay popup shown over other apps. Used when resultAction == popup (4).
@@ -36,22 +44,34 @@ object OverlayPopupManager {
         } catch (_: Exception) {}
     }
 
-    fun showText(ctx: Context, text: String): Boolean {
-        return show(ctx, text = text, imageUri = null)
+    fun showText(ctx: Context, text: String, isDark: Boolean): Boolean {
+        return show(ctx, isDark = isDark, text = text, imageUri = null)
     }
 
-    fun showImage(ctx: Context, imageUri: Uri): Boolean {
-        return show(ctx, text = null, imageUri = imageUri)
+    fun showImage(ctx: Context, imageUri: Uri, isDark: Boolean): Boolean {
+        return show(ctx, isDark = isDark, text = null, imageUri = imageUri)
     }
 
     @Synchronized
-    private fun show(ctx: Context, text: String? = null, imageUri: Uri? = null): Boolean {
+    private fun show(ctx: Context, isDark: Boolean, text: String? = null, imageUri: Uri? = null): Boolean {
         if (!canDrawOverlays(ctx)) return false
         dismiss()
         val appCtx = ctx.applicationContext
         val manager = appCtx.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         // Display metrics first so we can choose an initial Y offset above the center
         val dm = appCtx.resources.displayMetrics
+        val osNight = (appCtx.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        Log.d("CapyWarp/OverlayPopup", "show(): kind=${if (imageUri!=null) "image" else "text"}, osNight=$osNight, applied.isDark=$isDark")
+        // Palette mapped to our Compose theme tokens (approx)
+        val bgColor = if (isDark) 0xFF121214.toInt() else 0xFFFFFFFF.toInt() // surface
+        val onSurfaceColor = if (isDark) 0xFFE0E0E0.toInt() else 0xFF1A1C19.toInt()
+        val onSurfaceVariantColor = if (isDark) 0xFFC2C3C7.toInt() else 0xFF44474E.toInt()
+        val secondaryContainerColor = if (isDark) 0xFF2E3440.toInt() else 0xFFDCE3EE.toInt()
+        val onSecondaryContainerColor = if (isDark) 0xFFDDE3EA.toInt() else 0xFF141B22.toInt()
+        val outlineColor = if (isDark) 0xFF6E7074.toInt() else 0xFF74777F.toInt()
+        val outlineAlpha66 = (0x66000000).toInt() or (outlineColor and 0x00FFFFFF)
+        val imageBgColor = if (isDark) 0x11000000 else 0x1F000000
+
         val initialYOffset = - (dm.heightPixels * 0.15f).toInt() // raise popup by ~15% of screen height
         val lp = WindowManager.LayoutParams().apply {
             width = WindowManager.LayoutParams.WRAP_CONTENT
@@ -85,8 +105,9 @@ object OverlayPopupManager {
             setPadding(pad, pad, pad, pad)
             background = GradientDrawable().apply {
                 cornerRadius = 16f * dm.density
-                setColor(0xFF2B2B2F.toInt())
-                setStroke((1 * dm.density).toInt(), 0x33444444)
+                setColor(bgColor)
+                val outlineAlpha33 = (0x33000000).toInt() or (outlineColor and 0x00FFFFFF)
+                setStroke((1 * dm.density).toInt(), outlineAlpha33)
             }
             isFocusable = true
             isFocusableInTouchMode = true
@@ -125,13 +146,13 @@ object OverlayPopupManager {
         }
         val title = TextView(appCtx).apply {
             this.text = appCtx.getString(org.parkjw.capywarp.R.string.popup_title)
-            setTextColor(0xFFEDEDED.toInt())
+            setTextColor(onSurfaceColor)
             textSize = 18f
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         }
         val close = TextView(appCtx).apply {
             this.text = appCtx.getString(org.parkjw.capywarp.R.string.close)
-            setTextColor(0xFFEDEDED.toInt())
+            setTextColor(onSurfaceVariantColor)
             textSize = 16f
             setPadding(dp(appCtx, 12), dp(appCtx, 6), dp(appCtx, 12), dp(appCtx, 6))
             setOnClickListener { dismiss() }
@@ -166,7 +187,7 @@ object OverlayPopupManager {
                 maxWidth = maxW
                 maxHeight = maxImageH
                 layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-                setBackgroundColor(0x11000000)
+                setBackgroundColor(imageBgColor)
                 setOnTouchListener { _, ev -> if (ev.action == MotionEvent.ACTION_DOWN) { activateFocus(); false } else false }
                 try {
                     setImageURI(imageUri)
@@ -176,7 +197,7 @@ object OverlayPopupManager {
         } else if (text != null) {
             val markwon = Markwon.create(appCtx)
             val tv = TextView(appCtx).apply {
-                setTextColor(0xFFE0E0E0.toInt())
+                setTextColor(onSurfaceColor)
                 textSize = 14f
                 setLineSpacing(0f, 1.1f)
                 movementMethod = LinkMovementMethod.getInstance()
@@ -204,12 +225,12 @@ object OverlayPopupManager {
         fun addButton(label: String, onClick: () -> Unit) {
             val b = TextView(appCtx).apply {
                 this.text = label
-                setTextColor(0xFFFFFFFF.toInt())
+                setTextColor(onSecondaryContainerColor)
                 setPadding(dp(appCtx, 12), dp(appCtx, 9), dp(appCtx, 12), dp(appCtx, 9))
                 background = GradientDrawable().apply {
                     cornerRadius = 12f * appCtx.resources.displayMetrics.density
-                    setColor(0xFF3A3A3F.toInt())
-                    setStroke((1 * appCtx.resources.displayMetrics.density).toInt(), 0x6655575B.toInt())
+                    setColor(secondaryContainerColor)
+                    setStroke((1 * appCtx.resources.displayMetrics.density).toInt(), outlineAlpha66)
                 }
                 setOnClickListener { onClick() }
             }

@@ -172,7 +172,6 @@ class WarpRouterActivity : ComponentActivity() {
             else -> null
         } ?: ""
 
-        // Generic shared stream (image, pdf, office docs, txt, etc.)
         val sharedStreamUri: android.net.Uri? = if (action == Intent.ACTION_SEND) {
             if (android.os.Build.VERSION.SDK_INT >= 33) {
                 intent.getParcelableExtra(Intent.EXTRA_STREAM, android.net.Uri::class.java)
@@ -184,230 +183,235 @@ class WarpRouterActivity : ComponentActivity() {
         val sharedMimeType: String? = type
 
         setContent {
-            val promptListViewModel: PromptListViewModel = hiltViewModel()
-            val prompts by promptListViewModel.prompts.collectAsState(initial = emptyList())
+            // Follow app theme setting (light/dark/system) like MainActivity
+            val settingsVm: org.parkjw.capywarp.ui.viewmodels.SettingsViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+            val themeMode by settingsVm.theme.collectAsState(initial = "system")
+            val isDark = when (themeMode) {
+                "light" -> false
+                "dark" -> true
+                else -> androidx.compose.foundation.isSystemInDarkTheme()
+            }
+            org.parkjw.capywarp.ui.theme.CapyWarpTheme(darkTheme = isDark, dynamicColor = false) {
+                val promptListViewModel: PromptListViewModel = hiltViewModel()
+                val prompts by promptListViewModel.prompts.collectAsState(initial = emptyList())
 
-            // 뒤로가기 시 닫기
-            androidx.activity.compose.BackHandler { finish() }
+                // 뒤로가기 시 닫기
+                androidx.activity.compose.BackHandler { finish() }
 
-            // 패널 표시 상태 및 드래그/사이즈 상태
-            var panelVisible by remember { mutableStateOf(true) }
-            var offsetX by remember { mutableStateOf(0f) }
-            var offsetY by remember { mutableStateOf(0f) }
-            val config = androidx.compose.ui.platform.LocalConfiguration.current
-            var panelWidth by remember { mutableStateOf((config.screenWidthDp * 0.7f).dp.coerceIn(260.dp, 520.dp)) }
-            var panelHeight by remember { mutableStateOf((config.screenHeightDp * 0.6f).dp.coerceIn(300.dp, 720.dp)) }
-            var userResized by remember { mutableStateOf(false) }
-            var query by remember { mutableStateOf("") }
+                // 패널 표시 상태 및 드래그/사이즈 상태
+                var panelVisible by remember { mutableStateOf(true) }
+                var offsetX by remember { mutableStateOf(0f) }
+                var offsetY by remember { mutableStateOf(0f) }
+                val config = androidx.compose.ui.platform.LocalConfiguration.current
+                var panelWidth by remember { mutableStateOf((config.screenWidthDp * 0.7f).dp.coerceIn(260.dp, 520.dp)) }
+                var panelHeight by remember { mutableStateOf((config.screenHeightDp * 0.6f).dp.coerceIn(300.dp, 720.dp)) }
+                var userResized by remember { mutableStateOf(false) }
+                var query by remember { mutableStateOf("") }
 
-            // Transparent full-screen overlay that doesn't dim the host app
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                if (panelVisible) {
-                    // Centered floating panel (draggable, resizable)
-                    Surface(
-                        shape = MaterialTheme.shapes.medium,
-                        tonalElevation = 8.dp,
-                        shadowElevation = 12.dp,
-                        color = Color(0xFF2B2B2F),
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .sizeIn(minWidth = 260.dp, minHeight = 260.dp, maxWidth = 520.dp, maxHeight = 720.dp)
-                            .width(panelWidth)
-                            .height(panelHeight)
-                            .offset { androidx.compose.ui.unit.IntOffset(offsetX.toInt(), offsetY.toInt()) }
-                            .pointerInput(Unit) {
-                                detectDragGestures(
-                                    onDrag = { _, dragAmount ->
-                                        offsetX += dragAmount.x
-                                        offsetY += dragAmount.y
-                                    }
-                                )
-                            }
-                    ) {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                Text(
-                                    text = androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.app_name),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = Color(0xFFF2F2F3),
-                                    modifier = Modifier.weight(1f)
-                                )
-                                TextButton(onClick = { finish() }) { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.close), color = Color(0xFFEDEDED)) }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    if (panelVisible) {
+                        Surface(
+                            shape = MaterialTheme.shapes.medium,
+                            tonalElevation = 8.dp,
+                            shadowElevation = 12.dp,
+                            color = MaterialTheme.colorScheme.surface,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .sizeIn(minWidth = 260.dp, minHeight = 260.dp, maxWidth = 520.dp, maxHeight = 720.dp)
+                                .width(panelWidth)
+                                .height(panelHeight)
+                                .offset { androidx.compose.ui.unit.IntOffset(offsetX.toInt(), offsetY.toInt()) }
+                                .pointerInput(Unit) {
+                                    detectDragGestures(
+                                        onDrag = { _, dragAmount ->
+                                            offsetX += dragAmount.x
+                                            offsetY += dragAmount.y
+                                        }
+                                    )
                                 }
-
-                                // 검색 필터
-                            OutlinedTextField(
-                                value = query,
-                                onValueChange = { query = it },
-                                singleLine = true,
-                                placeholder = { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.search), color = MaterialTheme.colorScheme.onSurfaceVariant) },
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedContainerColor = Color(0xFF1F1F22),
-                                    unfocusedContainerColor = Color(0xFF1F1F22),
-                                    focusedTextColor = Color(0xFFECECEC),
-                                    unfocusedTextColor = Color(0xFFECECEC),
-                                    focusedBorderColor = Color(0xFF747579),
-                                    unfocusedBorderColor = Color(0xFF3C3D41),
-                                    cursorColor = Color(0xFFE0E0E0),
-                                    focusedLabelColor = Color(0xFFE0E0E0),
-                                    focusedLeadingIconColor = Color(0xFFE0E0E0),
-                                    focusedTrailingIconColor = Color(0xFFE0E0E0)
-                                )
-                            )
-
-                            var showText by remember { mutableStateOf(false) }
-                            if (selectedText.isNotBlank()) {
-                                TextButton(onClick = { showText = !showText }) {
-                                    Text(if (showText) androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.selected_text_hide) else androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.selected_text_show), color = Color(0xFFEDEDED))
-                                }
-                                if (showText) {
-                                    Surface(
-                                        tonalElevation = 1.dp,
-                                        shape = MaterialTheme.shapes.medium,
-                                        color = Color(0xFF1F1F22),
+                        ) {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
                                         Text(
-                                            text = selectedText,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = Color(0xFFCCCCCC),
-                                            modifier = Modifier.padding(12.dp)
+                                            text = androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.app_name),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        TextButton(onClick = { finish() }) { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.close), color = MaterialTheme.colorScheme.onSurface) }
+                                    }
+
+                                    OutlinedTextField(
+                                        value = query,
+                                        onValueChange = { query = it },
+                                        singleLine = true,
+                                        placeholder = { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.search), color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                            focusedBorderColor = MaterialTheme.colorScheme.outline,
+                                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                            cursorColor = MaterialTheme.colorScheme.onSurface,
+                                            focusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            focusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            focusedTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    )
+
+                                    var showText by remember { mutableStateOf(false) }
+                                    if (selectedText.isNotBlank()) {
+                                        TextButton(onClick = { showText = !showText }) {
+                                            Text(if (showText) androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.selected_text_hide) else androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.selected_text_show), color = MaterialTheme.colorScheme.onSurface)
+                                        }
+                                        if (showText) {
+                                            Surface(
+                                                tonalElevation = 1.dp,
+                                                shape = MaterialTheme.shapes.medium,
+                                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                                modifier = Modifier.fillMaxWidth()
+                                            ) {
+                                                Text(
+                                                    text = selectedText,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onSurface,
+                                                    modifier = Modifier.padding(12.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    if (sharedStreamUri != null) {
+                                        Surface(
+                                            tonalElevation = 1.dp,
+                                            shape = MaterialTheme.shapes.medium,
+                                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            val label = if ((sharedMimeType ?: "").startsWith("image/")) {
+                                                androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.image_attached, sharedStreamUri.toString())
+                                            } else {
+                                                androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.file_attached, sharedStreamUri.toString())
+                                            }
+                                            Text(
+                                                text = label,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                                modifier = Modifier.padding(12.dp)
+                                            )
+                                        }
+                                    }
+
+                                    val list = remember(query, prompts) {
+                                        prompts
+                                            .filter { it.resultAction != 0 }
+                                            .filter { !(it.outputType == 1 && it.resultAction == 1) }
+                                            .filter { p ->
+                                                val q = query.trim().lowercase()
+                                                if (q.isEmpty()) true else p.title.lowercase().contains(q) || p.content.lowercase().contains(q)
+                                            }
+                                    }
+
+                                    LaunchedEffect(list.size) {
+                                        if (!userResized) {
+                                            val visible = kotlin.math.min(4, list.size)
+                                            val itemArea = (visible * 64)
+                                            val headerArea = 220
+                                            val target = (itemArea + headerArea).dp
+                                            panelHeight = target.coerceIn(300.dp, 720.dp)
+                                        }
+                                    }
+                                    if (list.isEmpty()) {
+                                        Text(
+                                            text = androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.no_matching_prompt),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    } else {
+                                        LazyColumn(modifier = Modifier.weight(1f, fill = true), contentPadding = PaddingValues(vertical = 4.dp)) {
+                                            items(list, key = { it.id }) { prompt ->
+                                                Button(
+                                                    colors = ButtonDefaults.buttonColors(
+                                                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                                    ),
+                                                    onClick = {
+                                                        panelVisible = false
+                                                        val svc = Intent(this@WarpRouterActivity, WarpProcessService::class.java)
+                                                        svc.putExtra(WarpProcessService.EXTRA_TEXT, selectedText)
+                                                        svc.putExtra(WarpProcessService.EXTRA_PROMPT_ID, prompt.id)
+                                                        if (sharedStreamUri != null) {
+                                                            svc.putExtra(WarpProcessService.EXTRA_ATTACHMENT_URI, sharedStreamUri)
+                                                            if (!sharedMimeType.isNullOrBlank()) {
+                                                                svc.putExtra(WarpProcessService.EXTRA_ATTACHMENT_MIME, sharedMimeType)
+                                                            }
+                                                            svc.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                                            try { grantUriPermission(packageName, sharedStreamUri, Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_: Exception) {}
+                                                        }
+                                                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                                            startForegroundService(svc)
+                                                        } else {
+                                                            startService(svc)
+                                                        }
+                                                        finish()
+                                                    },
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(vertical = 4.dp)
+                                                ) {
+                                                    Column(modifier = Modifier.fillMaxWidth()) {
+                                                        Text(prompt.title)
+                                                        val actionLabel = if (prompt.outputType == 0) {
+                                                            when (prompt.resultAction) {
+                                                                1 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_copy_to_clipboard)
+                                                                2 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_notification)
+                                                                4 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_popup)
+                                                                else -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_process_result)
+                                                            }
+                                                        } else {
+                                                            when (prompt.resultAction) {
+                                                                2 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_notification_image)
+                                                                3 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_save_gallery)
+                                                                4 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_popup)
+                                                                else -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_process_result)
+                                                            }
+                                                        }
+                                                        Text(actionLabel, style = MaterialTheme.typography.labelSmall)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(16.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .align(Alignment.BottomEnd)
+                                                .size(24.dp)
+                                                .pointerInput(Unit) {
+                                                    detectDragGestures { _, drag ->
+                                                        val dw = drag.x.dp
+                                                        val dh = drag.y.dp
+                                                        userResized = true
+                                                        panelWidth = (panelWidth + dw).coerceIn(260.dp, 520.dp)
+                                                        panelHeight = (panelHeight + dh).coerceIn(260.dp, 720.dp)
+                                                    }
+                                                }
                                         )
                                     }
                                 }
-                            }
-
-                            if (sharedStreamUri != null) {
-                                Surface(
-                                    tonalElevation = 1.dp,
-                                    shape = MaterialTheme.shapes.medium,
-                                    color = Color(0xFF1F2A1F),
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    val label = if ((sharedMimeType ?: "").startsWith("image/")) {
-                                        androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.image_attached, sharedStreamUri.toString())
-                                    } else {
-                                        androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.file_attached, sharedStreamUri.toString())
-                                    }
-                                    Text(
-                                        text = label,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color(0xFFB7E4C7),
-                                        modifier = Modifier.padding(12.dp)
-                                    )
-                                }
-                            }
-
-                            val list = remember(query, prompts) {
-                                prompts
-                                    .filter { it.resultAction != 0 }
-                                    .filter { !(it.outputType == 1 && it.resultAction == 1) }
-                                    .filter { p ->
-                                        val q = query.trim().lowercase()
-                                        if (q.isEmpty()) true else p.title.lowercase().contains(q) || p.content.lowercase().contains(q)
-                                    }
-                            }
-                            // Adjust initial height based on prompt count (max 4 visible)
-                            LaunchedEffect(list.size) {
-                                if (!userResized) {
-                                    val visible = kotlin.math.min(4, list.size)
-                                    val itemArea = (visible * 64) // each approx 64dp height
-                                    val headerArea = 220 // title + search + paddings
-                                    val target = (itemArea + headerArea).dp
-                                    panelHeight = target.coerceIn(300.dp, 720.dp)
-                                }
-                            }
-                            if (list.isEmpty()) {
-                                Text(
-                                    text = androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.no_matching_prompt),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            } else {
-                                LazyColumn(modifier = Modifier.weight(1f, fill = true), contentPadding = PaddingValues(vertical = 4.dp)) {
-                                    items(list, key = { it.id }) { prompt ->
-                                        Button(
-                                            colors = ButtonDefaults.buttonColors(
-                                                containerColor = Color(0xFF3A3A3F),
-                                                contentColor = Color(0xFFEDEDED)
-                                            ),
-                                            onClick = {
-                                                // 백그라운드 처리 서비스 시작 후 즉시 종료
-                                                panelVisible = false
-                                                val svc = Intent(this@WarpRouterActivity, WarpProcessService::class.java)
-                                                svc.putExtra(WarpProcessService.EXTRA_TEXT, selectedText)
-                                                svc.putExtra(WarpProcessService.EXTRA_PROMPT_ID, prompt.id)
-                                                if (sharedStreamUri != null) {
-                                                    svc.putExtra(WarpProcessService.EXTRA_ATTACHMENT_URI, sharedStreamUri)
-                                                    if (!sharedMimeType.isNullOrBlank()) {
-                                                        svc.putExtra(WarpProcessService.EXTRA_ATTACHMENT_MIME, sharedMimeType)
-                                                    }
-                                                    svc.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                                    // also grant to service explicitly
-                                                    try { grantUriPermission(packageName, sharedStreamUri, Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_: Exception) {}
-                                                }
-                                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                                    startForegroundService(svc)
-                                                } else {
-                                                    startService(svc)
-                                                }
-                                                finish()
-                                            },
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(vertical = 4.dp)
-                                        ) {
-                                            Column(modifier = Modifier.fillMaxWidth()) {
-                                                Text(prompt.title)
-                                                val actionLabel = if (prompt.outputType == 0) {
-                                                    when (prompt.resultAction) {
-                                                        1 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_copy_to_clipboard)
-                                                        2 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_notification)
-                                                        4 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_popup)
-                                                        else -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_process_result)
-                                                    }
-                                                } else {
-                                                    when (prompt.resultAction) {
-                                                        2 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_notification_image)
-                                                        3 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_save_gallery)
-                                                        4 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_popup)
-                                                        else -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_process_result)
-                                                    }
-                                                }
-                                                Text(actionLabel, style = MaterialTheme.typography.labelSmall)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            // 사이즈 조절 핸들 (오른쪽 아래)
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(16.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.BottomEnd)
-                                        .size(24.dp)
-                                        .pointerInput(Unit) {
-                                            detectDragGestures { _, drag ->
-                                                val dw = drag.x.dp
-                                                val dh = drag.y.dp
-                                                userResized = true
-                                                panelWidth = (panelWidth + dw).coerceIn(260.dp, 520.dp)
-                                                panelHeight = (panelHeight + dh).coerceIn(260.dp, 720.dp)
-                                            }
-                                        }
-                                )
                             }
                         }
                     }
@@ -415,6 +419,4 @@ class WarpRouterActivity : ComponentActivity() {
             }
         }
     }
-}
-
 }

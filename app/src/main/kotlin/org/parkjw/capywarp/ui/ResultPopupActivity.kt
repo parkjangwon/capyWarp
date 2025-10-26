@@ -9,6 +9,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -26,18 +27,63 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.datastore.preferences.preferencesDataStoreFile
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
+
+private fun resolveIsDark(appCtx: Context): Boolean {
+    return try {
+        val dataStore = PreferenceDataStoreFactory.create(
+            produceFile = { appCtx.preferencesDataStoreFile("settings") }
+        )
+        val THEME_KEY = stringPreferencesKey("theme")
+        val themeValue = runBlocking { dataStore.data.map { it[THEME_KEY] ?: "system" }.first() }
+        val osNight = (appCtx.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val result = when (themeValue) {
+            "light" -> false
+            "dark" -> true
+            else -> osNight
+        }
+        Log.d("CapyWarp/ResultPopup", "resolveIsDark: themeValue=$themeValue, osNight=$osNight, result=$result")
+        result
+    } catch (e: Exception) {
+        val osNight = (appCtx.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        Log.w("CapyWarp/ResultPopup", "resolveIsDark fallback due to ${e.message}; osNight=$osNight")
+        osNight
+    }
+}
 
 @AndroidEntryPoint
 class ResultPopupActivity : ComponentActivity() {
+    @javax.inject.Inject lateinit var settingsRepository: org.parkjw.capywarp.domain.repository.SettingsRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Resolve theme synchronously from SettingsRepository mirror to avoid first-frame OS fallback
+        val themeValue = runCatching { settingsRepository.getThemeSync() }.getOrDefault("system")
+        val osNight = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val isDarkInit = when (themeValue) {
+            "light" -> false
+            "dark" -> true
+            else -> osNight
+        }
+        Log.d("CapyWarp/ResultPopup", "onCreate: applying theme(sync). theme=$themeValue, isDarkInit=$isDarkInit, osNight=$osNight")
         setContent {
-            ResultPopupScreen(
-                text = intent.getStringExtra(EXTRA_TEXT).orEmpty(),
-                imageUri = if (Build.VERSION.SDK_INT >= 33) intent.getParcelableExtra(EXTRA_IMAGE_URI, Uri::class.java) else @Suppress("DEPRECATION") intent.getParcelableExtra(EXTRA_IMAGE_URI) as? Uri,
-                onClose = { finish() }
-            )
+            // Apply app setting theme synchronously to avoid OS fallback during first frame
+            val isDark = isDarkInit
+            org.parkjw.capywarp.ui.theme.CapyWarpTheme(darkTheme = isDark, dynamicColor = false) {
+                ResultPopupScreen(
+                    text = intent.getStringExtra(EXTRA_TEXT).orEmpty(),
+                    imageUri = if (Build.VERSION.SDK_INT >= 33) intent.getParcelableExtra(EXTRA_IMAGE_URI, Uri::class.java) else @Suppress("DEPRECATION") intent.getParcelableExtra(EXTRA_IMAGE_URI) as? Uri,
+                    onClose = { finish() }
+                )
+            }
         }
     }
 
@@ -65,8 +111,8 @@ private fun ResultPopupScreen(text: String, imageUri: Uri?, onClose: () -> Unit)
     val maxSurfaceH = (conf.screenHeightDp * 0.45f).dp
     val maxContentH = (conf.screenHeightDp * 0.35f).dp
 
-    // Background pass-through (no dim)
-    Box(Modifier.fillMaxSize()) {
+    // Light/Dark themed backdrop to avoid appearing black in light mode
+    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Surface(
             shape = MaterialTheme.shapes.medium,
             tonalElevation = 8.dp,
@@ -105,9 +151,10 @@ private fun ResultPopupScreen(text: String, imageUri: Uri?, onClose: () -> Unit)
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 160.dp, max = maxContentH)
-                            .background(Color.Black.copy(alpha = 0.06f))
+                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
                     )
                 } else {
+                    val textColorArgb = MaterialTheme.colorScheme.onSurface.toArgb()
                     // Scrollable markdown-rendered text using AndroidView + Markwon
                     androidx.compose.ui.viewinterop.AndroidView(
                         factory = { context ->
@@ -115,7 +162,7 @@ private fun ResultPopupScreen(text: String, imageUri: Uri?, onClose: () -> Unit)
                                 isFillViewport = false
                             }
                             val tv = android.widget.TextView(context).apply {
-                                setTextColor(0xFFE0E0E0.toInt())
+                                setTextColor(textColorArgb)
                                 textSize = 14f
                                 setLineSpacing(0f, 1.1f)
                                 movementMethod = android.text.method.LinkMovementMethod.getInstance()
@@ -162,8 +209,8 @@ private fun ResultPopupScreen(text: String, imageUri: Uri?, onClose: () -> Unit)
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF3A3A3F),
-                            contentColor = Color(0xFFFFFFFF)
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                     ) { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_copy_to_clipboard)) }
 
@@ -199,8 +246,8 @@ private fun ResultPopupScreen(text: String, imageUri: Uri?, onClose: () -> Unit)
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF3A3A3F),
-                            contentColor = Color(0xFFFFFFFF)
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                     ) { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_share)) }
 
@@ -212,10 +259,10 @@ private fun ResultPopupScreen(text: String, imageUri: Uri?, onClose: () -> Unit)
                                 android.widget.Toast.makeText(ctx, if (ok) ctx.getString(org.parkjw.capywarp.R.string.toast_saved_to_gallery) else ctx.getString(org.parkjw.capywarp.R.string.toast_save_gallery_failed), android.widget.Toast.LENGTH_SHORT).show()
                             },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF3A3A3F),
-                                contentColor = Color(0xFFFFFFFF)
-                            )
-                        ) { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_save_gallery)) }
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    ) { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_save_gallery)) }
                     }
                 }
             }

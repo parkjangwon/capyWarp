@@ -35,30 +35,36 @@ val md_theme_light_scrim = Color(0xFF000000)
 
 val md_theme_dark_primary = Color(0xFF0D47A1) // deep blue accent
 val md_theme_dark_onPrimary = Color(0xFFFFFFFF)
-val md_theme_dark_primaryContainer = Color(0xFF1565C0)
-val md_theme_dark_onPrimaryContainer = Color(0xFFFFFFFF)
-val md_theme_dark_secondary = Color(0xFF4A4A4A)
-val md_theme_dark_onSecondary = Color(0xFFFFFFFF)
-val md_theme_dark_secondaryContainer = Color(0xFF2F2F2F)
-val md_theme_dark_onSecondaryContainer = Color(0xFFEDEDED)
-val md_theme_dark_tertiary = Color(0xFF5A5A5A)
-val md_theme_dark_onTertiary = Color(0xFFFFFFFF)
-val md_theme_dark_tertiaryContainer = Color(0xFF383838)
-val md_theme_dark_onTertiaryContainer = Color(0xFFEDEDED)
+// Darken the container to avoid glare; lighten onPrimaryContainer for contrast
+val md_theme_dark_primaryContainer = Color(0xFF0B3B82)
+val md_theme_dark_onPrimaryContainer = Color(0xFFCCE1FF)
+// Use a neutral blue-gray for secondary accents with sufficient contrast
+val md_theme_dark_secondary = Color(0xFF8D99AE)
+val md_theme_dark_onSecondary = Color(0xFF0F1113)
+val md_theme_dark_secondaryContainer = Color(0xFF2E3440)
+val md_theme_dark_onSecondaryContainer = Color(0xFFDDE3EA)
+// Subtle teal-gray tertiary
+val md_theme_dark_tertiary = Color(0xFF7AA2A6)
+val md_theme_dark_onTertiary = Color(0xFF0E1212)
+val md_theme_dark_tertiaryContainer = Color(0xFF2B3A3D)
+val md_theme_dark_onTertiaryContainer = Color(0xFFDBEAEA)
 val md_theme_dark_error = Color(0xFFFFB4AB)
 val md_theme_dark_errorContainer = Color(0xFF93000A)
 val md_theme_dark_onError = Color(0xFF690005)
 val md_theme_dark_onErrorContainer = Color(0xFFFFDAD6)
 val md_theme_dark_background = Color(0xFF0E0E0F) // near black
-val md_theme_dark_onBackground = Color(0xFFF2F2F2)
+// Slightly dimmer than pure white to reduce glare on dark
+val md_theme_dark_onBackground = Color(0xFFE0E0E0)
 val md_theme_dark_surface = Color(0xFF121214)
-val md_theme_dark_onSurface = Color(0xFFEDEDED)
-val md_theme_dark_surfaceVariant = Color(0xFF2A2A2C)
-val md_theme_dark_onSurfaceVariant = Color(0xFFB5B5B8)
-val md_theme_dark_outline = Color(0xFF606063)
+val md_theme_dark_onSurface = Color(0xFFE0E0E0)
+// Slightly lighter variant for clearer separation of cards/dividers
+val md_theme_dark_surfaceVariant = Color(0xFF2D2F33)
+val md_theme_dark_onSurfaceVariant = Color(0xFFC2C3C7)
+val md_theme_dark_outline = Color(0xFF6E7074)
 val md_theme_dark_inverseOnSurface = Color(0xFF121214)
 val md_theme_dark_inverseSurface = Color(0xFFEDEDED)
 val md_theme_dark_inversePrimary = Color(0xFFBDBDBD)
-val md_theme_dark_surfaceTint = Color(0xFF2E2E2E)
+// Use primary as tint to align with M3 expectations
+val md_theme_dark_surfaceTint = md_theme_dark_primary
 val md_theme_dark_outlineVariant = Color(0xFF2A2A2C)
 val md_theme_dark_scrim = Color(0xFF000000)
