@@ -41,6 +41,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // 오버레이 권한 요청 (앱 실행 시 1회 유도)
+        // 다른 앱 위에 표시하려면 SYSTEM_ALERT_WINDOW 권한이 필요합니다.
+        // 권한이 없다면 설정 화면으로 이동하도록 안내합니다.
+        if (!OverlayPopupManager.canDrawOverlays(this)) {
+            OverlayPopupManager.requestOverlayPermission(this)
+        }
+
         setContent {
             val settingsVm: org.parkjw.capywarp.ui.viewmodels.SettingsViewModel = androidx.hilt.navigation.compose.hiltViewModel()
             val themeMode by settingsVm.theme.collectAsState(initial = "system")
