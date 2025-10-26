@@ -110,7 +110,29 @@
     <!-- Popup -->
     <string name="action_show_popup">Show popup</string>
     <string name="popup_title">CapyWarp Result</string>
-    
-    <!-- Help: How to run a prompt -->
-    <string name="help_how_to_run_body">- Texte : Sélectionnez du texte dans n’importe quelle application et touchez le bouton Warp! dans le menu de sélection (TRAITER LE TEXTE), puis choisissez un prompt.\n- Image/Fichier : Utilisez l’action Partager du système pour envoyer l’image ou le fichier à CapyWarp, puis choisissez un prompt.</string>
+
+    <!-- Help / User Guide -->
+    <string name="help_title">Guía del usuario</string>
+    <string name="settings_help_section">Ayuda</string>
+    <string name="settings_open_help">Abrir guía del usuario</string>
+
+    <!-- Help intro (app philosophy) -->
+    <string name="help_intro_title">¿Por qué CapyWarp?</string>
+    <string name="help_intro_body">CapyWarp fue creado para guardar tus prompts de IA más utilizados y acceder a ellos instantáneamente desde cualquier lugar de tu teléfono. Marca tus propios prompts como favoritos y actívalos en segundos, ya sea que estés leyendo, enviando mensajes o trabajando. Mantén tu flujo de trabajo: selecciona texto o comparte una imagen, toca Warp! y deja que tu prompt favorito haga el trabajo pesado.</string>
+
+    <string name="help_section_permissions">1. Permisos requeridos &amp; uso</string>
+    <string name="help_permissions_body">- Publicar notificaciones: Para mostrar notificaciones de procesamiento/resultado.\n- Mostrar sobre otras aplicaciones (superposición): Para mostrar la ventana flotante de resultado cuando eliges \"Mostrar popup\".\n- Almacenamiento/Medios (con alcance): Para guardar imágenes generadas en la galería cuando eliges \"Guardar en galería\".</string>
+
+    <string name="help_section_prompt_tips">2. Gestionar prompts &amp; consejos</string>
+    <string name="help_prompt_tips_body">- Usa $TEXT en tu plantilla de prompt donde el texto seleccionado debe insertarse.\n- Mantén los prompts cortos y específicos. Agrega tu instrucción común en Configuración &gt; Prompt global.\n- Para imágenes, comparte una imagen desde cualquier app a CapyWarp y elige un prompt compatible con imágenes.</string>
+
+    <string name="help_section_how_to_run">3. Cómo ejecutar un prompt</string>
+    <string name="help_how_to_run_body">- Texto: Selecciona texto en cualquier app y toca el botón Warp! en el menú contextual de selección (PROCESS_TEXT), o usa Compartir/Procesar texto, luego elige CapyWarp y selecciona un prompt.\n- Imagen/Archivo: Usa la acción Compartir del sistema para enviar el archivo o imagen a CapyWarp, luego elige un prompt.</string>
+
+    <string name="help_section_response_usage">4. Tipos de respuesta &amp; uso</string>
+    <string name="help_response_usage_body">- Notificación: Recibe el resultado como una notificación.\n- Popup: Muestra una tarjeta flotante sobre otras apps (requiere permiso de superposición).\n- Copiar al portapapeles: El resultado se copia para que puedas pegarlo en cualquier lugar.\n- Resultados de imagen: Puedes compartir, copiar o guardar en la galería desde la notificación o popup.</string>
+
+    <!-- Help: Gemini API -->
+    <string name="help_section_gemini_api">5. Guía de la API de Gemini</string>
+    <string name="help_gemini_api_body">- Clave API: Obténla en Google AI Studio (makersuite.google.com/app/apikey), luego ingrésala en Configuración &gt; Clave API de Gemini.\n- Modelos: Elige un modelo de texto para prompts de texto (ej. Gemini 2.5 Flash/Pro) y un modelo de imagen para generación de imágenes (ej. Gemini 2.5 Flash Image).\n- Límites de velocidad: El nivel gratuito tiene límites por minuto. La app reintenta automáticamente brevemente en errores de límite de velocidad.\n- Costos: Usar modelos de pago puede generar cargos según los precios de Google AI. Verifica tu cuota y facturación.\n- Seguridad &amp; privacidad: No pegues credenciales o información personal sensible en los prompts. Revisa las políticas de seguridad de Google.\n- Solución de problemas: Si obtienes errores de autenticación/permisos, vuelve a verificar la clave API y la disponibilidad del modelo en tu región/proyecto.</string>
 </resources>
