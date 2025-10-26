@@ -125,4 +125,29 @@
     <!-- Popup -->
     <string name="action_show_popup">Show popup</string>
     <string name="popup_title">CapyWarp Result</string>
+
+    <!-- Help / User Guide -->
+    <string name="help_title">用户指南</string>
+    <string name="settings_help_section">帮助</string>
+    <string name="settings_open_help">打开用户指南</string>
+
+    <!-- Help intro (app philosophy) -->
+    <string name="help_intro_title">为什么选择 CapyWarp？</string>
+    <string name="help_intro_body">CapyWarp 旨在保存您常用的 AI 提示词，并可从手机的任何位置即时访问。收藏您自己的提示词，并在几秒钟内触发它们——无论您是在阅读、发消息还是工作。保持您的工作流程：选择文本或分享图片，点击 Warp!，让您常用的提示词完成繁重的工作。</string>
+
+    <string name="help_section_permissions">1. 所需权限 &amp; 使用说明</string>
+    <string name="help_permissions_body">- 发送通知：用于显示处理/结果通知。\n- 在其他应用上层显示（悬浮窗）：当您选择"显示弹窗"时，用于显示浮动结果弹窗。\n- 存储/媒体（作用域）：当您选择"保存到图库"时，用于将生成的图片保存到图库。</string>
+
+    <string name="help_section_prompt_tips">2. 管理提示词 &amp; 提示</string>
+    <string name="help_prompt_tips_body">- 在提示词模板中使用 $TEXT，标记所选文本应插入的位置。\n- 保持提示词简短且具体。在设置 &gt; 全局提示词中添加您的通用指令。\n- 对于图片，从任何应用分享图片到 CapyWarp，然后选择支持图片的提示词。</string>
+
+    <string name="help_section_how_to_run">3. 如何运行提示词</string>
+    <string name="help_how_to_run_body">- 文本：在任何应用中选择文本，然后在选择上下文菜单中点击 Warp! 按钮（PROCESS_TEXT），或使用分享/处理文本，然后选择 CapyWarp 并选择提示词。\n- 图片/文件：使用系统分享功能将文件或图片发送到 CapyWarp，然后选择提示词。</string>
+
+    <string name="help_section_response_usage">4. 响应类型 &amp; 使用方法</string>
+    <string name="help_response_usage_body">- 通知：以通知形式接收结果。\n- 弹窗：在其他应用上方显示浮动卡片（需要悬浮窗权限）。\n- 复制到剪贴板：结果会被复制，您可以在任何地方粘贴。\n- 图片结果：您可以从通知或弹窗中分享、复制或保存到图库。</string>
+
+    <!-- Help: Gemini API -->
+    <string name="help_section_gemini_api">5. Gemini API 指南</string>
+    <string name="help_gemini_api_body">- API 密钥：从 Google AI Studio (makersuite.google.com/app/apikey) 获取，然后在设置 &gt; Gemini API 密钥中输入。\n- 模型：为文本提示词选择文本模型（例如 Gemini 2.5 Flash/Pro），为图片生成选择图片模型（例如 Gemini 2.5 Flash Image）。\n- 速率限制：免费套餐每分钟有请求限制。应用会在遇到速率限制错误时自动短暂重试。\n- 费用：使用付费模型可能会根据 Google AI 定价产生费用。请检查您的配额和账单。\n- 安全 &amp; 隐私：不要在提示词中粘贴凭据或敏感的个人身份信息。请查阅 Google 的安全政策。\n- 故障排除：如果您遇到身份验证/权限错误，请重新检查 API 密钥以及您所在地区/项目中模型的可用性。</string>
 </resources>

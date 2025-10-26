@@ -1,14 +1,6 @@
 package org.parkjw.capywarp.ui
 
 import android.util.Log
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import androidx.datastore.preferences.preferencesDataStoreFile
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
-
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager

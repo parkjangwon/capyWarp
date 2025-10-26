@@ -12,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import org.parkjw.capywarp.ui.screens.PromptEditorScreen
 import org.parkjw.capywarp.ui.screens.PromptListScreen
 import org.parkjw.capywarp.ui.screens.SettingsScreen
+import org.parkjw.capywarp.ui.screens.HelpScreen
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -96,8 +97,13 @@ class MainActivity : AppCompatActivity() {
 
                         composable("settings") {
                             SettingsScreen(
-                                onNavigateBack = { navController.popBackStack() }
+                                onNavigateBack = { navController.popBackStack() },
+                                onNavigateToHelp = { navController.navigate("help") }
                             )
+                        }
+
+                        composable("help") {
+                            HelpScreen(onNavigateBack = { navController.popBackStack() })
                         }
                     }
                 }

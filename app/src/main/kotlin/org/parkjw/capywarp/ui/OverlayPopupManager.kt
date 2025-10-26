@@ -1,5 +1,6 @@
 package org.parkjw.capywarp.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
@@ -13,22 +14,15 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.ScrollView
-import androidx.core.content.ContextCompat
 import io.noties.markwon.Markwon
 import android.text.method.LinkMovementMethod
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import androidx.datastore.preferences.preferencesDataStoreFile
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
 
 /**
  * Lightweight system overlay popup shown over other apps. Used when resultAction == popup (4).
  * Requires android.permission.SYSTEM_ALERT_WINDOW and user-granted overlay permission.
  * This implementation uses classic Android Views to avoid Compose lifecycle requirements.
  */
+@SuppressLint("StaticFieldLeak")
 object OverlayPopupManager {
     private var wm: WindowManager? = null
     private var view: View? = null
@@ -330,6 +324,7 @@ object OverlayPopupManager {
         wm = null
     }
 
+    @SuppressLint("StaticFieldLeak")
     private fun saveImageToGallery(ctx: Context, uri: Uri): Boolean {
         return try {
             val mime = ctx.contentResolver.getType(uri) ?: "image/png"

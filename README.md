@@ -4,15 +4,17 @@
   <img src=".github/images/capyWarpLogo.png" alt="CapyLinker Logo" width="300"/>
 </p>
 
-CapyWarp is a lightweight Android utility that integrates into the OS, letting you send selected text or shared images to your favorite AI model via prompts you define.
+CapyWarp is a lightweight Android utility that integrates into the OS and runs entirely on the Google Gemini API. 
 
-It works from anywhere using the Android share sheet (for images) or the text selection menu (`PROCESS_TEXT`) and delivers the result back as a notification, popup window, clipboard copy, or saved image—all configurable per prompt.
+You send selected text or shared images to Gemini using prompts you define, and CapyWarp delivers the response in the way you prefer.
+
+It works from anywhere using the Android share sheet (for images) or the text selection menu (`PROCESS_TEXT`) and delivers the result back as a notification, popup window, clipboard copy, or saved image — all configurable per prompt.
 
 ## ✨ Key Features
 
-### 🤖 AI Integration
+### 🤖 Gemini Integration
 
-* **Text & Image Input**: Send selected text or shared photos/screenshots to your AI from any app.
+* **Text & Image Input**: Send selected text or shared photos/screenshots to Google Gemini from any app.
 * **Flexible Output**: Configure prompts to receive responses as either text or generated images.
 * **Powerful Prompt Management**: Define templates using the `$TEXT` variable and set input/output types and result handling for each prompt.
 * **One-tap `$TEXT` Insert**: Insert the `$TEXT` token into your template via a dedicated button in the prompt editor.
@@ -36,6 +38,14 @@ It works from anywhere using the Android share sheet (for images) or the text se
 * **Auto‑attach Selected Text**: If your template doesn’t include `$TEXT`, you can let the app auto‑attach the selected text at the top or bottom (Settings).
 * **Language**: Choose the app language directly in Settings (default: English). Applies immediately.
 * **Reliable Requests**: Built-in auto‑retry (up to 3 attempts) for transient errors and rate limits. The processing notification shows the current retry as “retry X/3”.
+
+## 🧭 Powered by Google Gemini
+
+CapyWarp works exclusively with the Google Gemini API.
+- Get an API key from Google AI Studio: https://makersuite.google.com/app/apikey
+- Read Gemini docs: https://ai.google.dev/gemini-api/docs
+
+We’re grateful for Gemini — this app is built with it in mind.
 
 ## 📖 How to Use
 

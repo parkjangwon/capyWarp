@@ -94,6 +94,9 @@
     <string name="editor_output_text">Text</string>
     <string name="editor_output_image">Image</string>
 
+    <!-- Missing key added -->
+    <string name="editor_insert_text_token">$TEXT を挿入</string>
+
     <string name="settings_api_hint">Enter your Gemini API key to enable AI processing.</string>
     <string name="settings_api_get_key">Get an API key from Google AI Studio: https://makersuite.google.com/app/apikey</string>
     <string name="settings_model_tip">Choose the Gemini model to use for analysis.</string>
@@ -109,4 +112,7 @@
     <!-- Popup -->
     <string name="action_show_popup">Show popup</string>
     <string name="popup_title">CapyWarp Result</string>
+    
+    <!-- Help: How to run a prompt -->
+    <string name="help_how_to_run_body">- テキスト: 任意のアプリでテキストを選択し、テキスト処理メニューで「Warp!」をタップして、プロンプトを選択します。\n- 画像/ファイル: システムの共有機能で画像やファイルをCapyWarpに共有し、プロンプトを選択します。</string>
 </resources>

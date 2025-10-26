@@ -1,6 +1,5 @@
 package org.parkjw.capywarp.ui
 
-import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.ContentValues
@@ -22,42 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import dagger.hilt.android.AndroidEntryPoint
-import androidx.datastore.preferences.preferencesDataStoreFile
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
-
-private fun resolveIsDark(appCtx: Context): Boolean {
-    return try {
-        val dataStore = PreferenceDataStoreFactory.create(
-            produceFile = { appCtx.preferencesDataStoreFile("settings") }
-        )
-        val THEME_KEY = stringPreferencesKey("theme")
-        val themeValue = runBlocking { dataStore.data.map { it[THEME_KEY] ?: "system" }.first() }
-        val osNight = (appCtx.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
-        val result = when (themeValue) {
-            "light" -> false
-            "dark" -> true
-            else -> osNight
-        }
-        Log.d("CapyWarp/ResultPopup", "resolveIsDark: themeValue=$themeValue, osNight=$osNight, result=$result")
-        result
-    } catch (e: Exception) {
-        val osNight = (appCtx.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
-        Log.w("CapyWarp/ResultPopup", "resolveIsDark fallback due to ${e.message}; osNight=$osNight")
-        osNight
-    }
-}
 
 @AndroidEntryPoint
 class ResultPopupActivity : ComponentActivity() {

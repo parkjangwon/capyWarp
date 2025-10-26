@@ -52,6 +52,7 @@ import org.parkjw.capywarp.ui.viewmodels.SettingsViewModel
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToHelp: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -229,6 +230,13 @@ fun SettingsScreen(
                     createDoc.launch(fileName)
                 }) { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.settings_backup_create)) }
                 Button(onClick = { openDoc.launch(arrayOf("application/json")) }) { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.settings_backup_restore)) }
+            }
+
+            // Single compact help button just above version info (no extra section)
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                Button(onClick = onNavigateToHelp) {
+                    Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.help_title))
+                }
             }
 
             Spacer(Modifier.height(24.dp))

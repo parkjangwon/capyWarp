@@ -110,4 +110,29 @@
     <!-- Popup -->
     <string name="action_show_popup">Show popup</string>
     <string name="popup_title">CapyWarp Result</string>
+
+    <!-- Help / User Guide -->
+    <string name="help_title">Benutzerhandbuch</string>
+    <string name="settings_help_section">Hilfe</string>
+    <string name="settings_open_help">Benutzerhandbuch öffnen</string>
+
+    <!-- Help intro (app philosophy) -->
+    <string name="help_intro_title">Warum CapyWarp?</string>
+    <string name="help_intro_body">CapyWarp wurde entwickelt, um Ihre häufig verwendeten KI-Prompts zu speichern und von überall auf Ihrem Smartphone sofort darauf zuzugreifen. Speichern Sie Ihre eigenen Prompts als Favoriten und lösen Sie sie in Sekunden aus – egal ob Sie lesen, Nachrichten schreiben oder arbeiten. Behalten Sie Ihren Workflow bei: Wählen Sie Text aus oder teilen Sie ein Bild, tippen Sie auf Warp! und lassen Sie Ihren Lieblings-Prompt die Arbeit erledigen.</string>
+
+    <string name="help_section_permissions">1. Erforderliche Berechtigungen &amp; Verwendung</string>
+    <string name="help_permissions_body">- Benachrichtigungen senden: Um Verarbeitungs-/Ergebnisbenachrichtigungen anzuzeigen.\n- Über anderen Apps anzeigen (Overlay): Um das schwebende Ergebnis-Popup anzuzeigen, wenn Sie \"Popup anzeigen\" wählen.\n- Speicher/Medien (eingeschränkt): Um generierte Bilder in der Galerie zu speichern, wenn Sie \"In Galerie speichern\" wählen.</string>
+
+    <string name="help_section_prompt_tips">2. Prompts verwalten &amp; Tipps</string>
+    <string name="help_prompt_tips_body">- Verwenden Sie $TEXT in Ihrer Prompt-Vorlage, wo der ausgewählte Text eingefügt werden soll.\n- Halten Sie Prompts kurz und spezifisch. Fügen Sie Ihre allgemeine Anweisung in Einstellungen &gt; Globales Prompt hinzu.\n- Für Bilder teilen Sie ein Bild von einer beliebigen App mit CapyWarp und wählen Sie einen bildfähigen Prompt aus.</string>
+
+    <string name="help_section_how_to_run">3. Wie man einen Prompt ausführt</string>
+    <string name="help_how_to_run_body">- Text: Wählen Sie Text in einer beliebigen App aus und tippen Sie auf die Warp!-Schaltfläche im Auswahlkontextmenü (PROCESS_TEXT), oder verwenden Sie Teilen/Text verarbeiten, wählen Sie dann CapyWarp und einen Prompt.\n- Bild/Datei: Verwenden Sie die Teilen-Funktion des Systems, um die Datei oder das Bild an CapyWarp zu senden, und wählen Sie dann einen Prompt.</string>
+
+    <string name="help_section_response_usage">4. Antworttypen &amp; Verwendung</string>
+    <string name="help_response_usage_body">- Benachrichtigung: Erhalten Sie das Ergebnis als Benachrichtigung.\n- Popup: Zeigen Sie eine schwebende Karte über anderen Apps an (erfordert Overlay-Berechtigung).\n- In Zwischenablage kopieren: Das Ergebnis wird kopiert, sodass Sie es überall einfügen können.\n- Bildergebnisse: Sie können das Bild von der Benachrichtigung oder dem Popup aus teilen, kopieren oder in der Galerie speichern.</string>
+
+    <!-- Help: Gemini API -->
+    <string name="help_section_gemini_api">5. Gemini API Anleitung</string>
+    <string name="help_gemini_api_body">- API-Schlüssel: Erhalten Sie ihn von Google AI Studio (makersuite.google.com/app/apikey) und geben Sie ihn in Einstellungen &gt; Gemini API-Schlüssel ein.\n- Modelle: Wählen Sie ein Textmodell für Text-Prompts (z. B. Gemini 2.5 Flash/Pro) und ein Bildmodell für Bildgenerierung (z. B. Gemini 2.5 Flash Image).\n- Ratenbegrenzungen: Der kostenlose Tarif hat Limits pro Minute. Die App versucht es automatisch kurz erneut bei Ratenbegrenzungsfehlern.\n- Kosten: Die Verwendung kostenpflichtiger Modelle kann gemäß der Google AI-Preisgestaltung Gebühren verursachen. Überprüfen Sie Ihr Kontingent und Ihre Abrechnung.\n- Sicherheit &amp; Datenschutz: Fügen Sie keine Anmeldedaten oder sensible personenbezogene Daten in Prompts ein. Überprüfen Sie die Sicherheitsrichtlinien von Google.\n- Fehlerbehebung: Wenn Sie Authentifizierungs-/Berechtigungsfehler erhalten, überprüfen Sie den API-Schlüssel und die Modellverfügbarkeit in Ihrer Region/Ihrem Projekt.</string>
 </resources>

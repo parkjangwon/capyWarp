@@ -121,4 +121,29 @@
     <!-- Popup -->
     <string name="action_show_popup">Show popup</string>
     <string name="popup_title">CapyWarp Result</string>
+    
+    <!-- Help / User Guide -->
+    <string name="help_title">User guide</string>
+    <string name="settings_help_section">Help</string>
+    <string name="settings_open_help">Open user guide</string>
+    
+    <!-- Help intro (app philosophy) -->
+    <string name="help_intro_title">Why CapyWarp?</string>
+    <string name="help_intro_body">CapyWarp was built to save your frequently used AI prompts and reach them instantly from anywhere on your phone. Favorite your own prompts and trigger them in seconds — whether you’re reading, messaging, or working. Keep your workflow: select text or share an image, tap Warp!, and let your go-to prompt do the heavy lifting.</string>
+    
+    <string name="help_section_permissions">1. Permissions required &amp; usage</string>
+    <string name="help_permissions_body">- Post notifications: To show processing/result notifications.\n- Display over other apps (overlay): To show the floating result popup when you choose \"Show popup\".\n- Storage/Media (scoped): To save generated images to the gallery when you choose \"Save to gallery\".</string>
+
+    <string name="help_section_prompt_tips">2. Manage prompts &amp; tips</string>
+    <string name="help_prompt_tips_body">- Use $TEXT in your prompt template where selected text should be inserted.\n- Keep prompts short and specific. Add your common instruction in Settings &gt; Global prompt.\n- For images, share an image from any app to CapyWarp and pick an image-capable prompt.</string>
+
+    <string name="help_section_how_to_run">3. How to run a prompt</string>
+    <string name="help_how_to_run_body">- Text: Select text in any app and tap the Warp! button in the selection context menu (PROCESS_TEXT), or use Share/Process Text, then pick CapyWarp and choose a prompt.\n- Image/File: Use the system Share action to send the file or image to CapyWarp, then choose a prompt.</string>
+
+    <string name="help_section_response_usage">4. Response types &amp; usage</string>
+    <string name="help_response_usage_body">- Notification: Receive the result as a notification.\n- Popup: Show a floating card over other apps (requires overlay permission).\n- Copy to clipboard: The result is copied so you can paste anywhere.\n- Image results: You can share, copy, or save to gallery from the notification or popup.</string>
+
+    <!-- Help: Gemini API -->
+    <string name="help_section_gemini_api">5. Gemini API guide</string>
+    <string name="help_gemini_api_body">- API key: Get it from Google AI Studio (makersuite.google.com/app/apikey), then enter it in Settings &gt; Gemini API Key.\n- Models: Choose a text model for text prompts (e.g., Gemini 2.5 Flash/Pro) and an image model for image generation (e.g., Gemini 2.5 Flash Image).\n- Rate limits: Free tier has per-minute limits. The app auto-retries briefly on rate-limit errors.\n- Costs: Using paid models may incur charges according to Google AI pricing. Check your quota and billing.\n- Safety &amp; privacy: Don’t paste credentials or sensitive PII in prompts. Review Google’s safety policies.\n- Troubleshooting: If you get auth/permission errors, re-check the API key and model availability in your region/project.</string>
 </resources>

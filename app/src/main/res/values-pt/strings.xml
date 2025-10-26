@@ -110,4 +110,29 @@
     <!-- Popup -->
     <string name="action_show_popup">Show popup</string>
     <string name="popup_title">CapyWarp Result</string>
+
+    <!-- Help / User Guide -->
+    <string name="help_title">Guia do usuário</string>
+    <string name="settings_help_section">Ajuda</string>
+    <string name="settings_open_help">Abrir guia do usuário</string>
+
+    <!-- Help intro (app philosophy) -->
+    <string name="help_intro_title">Por que CapyWarp?</string>
+    <string name="help_intro_body">O CapyWarp foi criado para salvar seus prompts de IA mais usados e acessá-los instantaneamente de qualquer lugar do seu telefone. Favorite seus próprios prompts e acione-os em segundos — seja lendo, enviando mensagens ou trabalhando. Mantenha seu fluxo de trabalho: selecione texto ou compartilhe uma imagem, toque em Warp! e deixe seu prompt favorito fazer o trabalho pesado.</string>
+
+    <string name="help_section_permissions">1. Permissões necessárias &amp; uso</string>
+    <string name="help_permissions_body">- Enviar notificações: Para mostrar notificações de processamento/resultado.\n- Exibir sobre outros apps (sobreposição): Para mostrar o popup flutuante de resultado quando você escolhe \"Mostrar popup\".\n- Armazenamento/Mídia (com escopo): Para salvar imagens geradas na galeria quando você escolhe \"Salvar na galeria\".</string>
+
+    <string name="help_section_prompt_tips">2. Gerenciar prompts &amp; dicas</string>
+    <string name="help_prompt_tips_body">- Use $TEXT no seu modelo de prompt onde o texto selecionado deve ser inserido.\n- Mantenha os prompts curtos e específicos. Adicione sua instrução comum em Configurações &gt; Prompt global.\n- Para imagens, compartilhe uma imagem de qualquer app para o CapyWarp e escolha um prompt compatível com imagens.</string>
+
+    <string name="help_section_how_to_run">3. Como executar um prompt</string>
+    <string name="help_how_to_run_body">- Texto: Selecione texto em qualquer app e toque no botão Warp! no menu de contexto de seleção (PROCESS_TEXT), ou use Compartilhar/Processar texto, depois escolha CapyWarp e selecione um prompt.\n- Imagem/Arquivo: Use a ação Compartilhar do sistema para enviar o arquivo ou imagem para o CapyWarp, depois escolha um prompt.</string>
+
+    <string name="help_section_response_usage">4. Tipos de resposta &amp; uso</string>
+    <string name="help_response_usage_body">- Notificação: Receba o resultado como uma notificação.\n- Popup: Mostre um card flutuante sobre outros apps (requer permissão de sobreposição).\n- Copiar para área de transferência: O resultado é copiado para que você possa colar em qualquer lugar.\n- Resultados de imagem: Você pode compartilhar, copiar ou salvar na galeria a partir da notificação ou popup.</string>
+
+    <!-- Help: Gemini API -->
+    <string name="help_section_gemini_api">5. Guia da API Gemini</string>
+    <string name="help_gemini_api_body">- Chave da API: Obtenha-a no Google AI Studio (makersuite.google.com/app/apikey), depois insira em Configurações &gt; Chave da API Gemini.\n- Modelos: Escolha um modelo de texto para prompts de texto (por exemplo, Gemini 2.5 Flash/Pro) e um modelo de imagem para geração de imagens (por exemplo, Gemini 2.5 Flash Image).\n- Limites de taxa: O nível gratuito tem limites por minuto. O app tenta novamente automaticamente em caso de erros de limite de taxa.\n- Custos: Usar modelos pagos pode gerar cobranças de acordo com os preços da Google AI. Verifique sua cota e faturamento.\n- Segurança &amp; privacidade: Não cole credenciais ou informações pessoais sensíveis em prompts. Revise as políticas de segurança do Google.\n- Solução de problemas: Se você receber erros de autenticação/permissão, verifique novamente a chave da API e a disponibilidade do modelo na sua região/projeto.</string>
 </resources>

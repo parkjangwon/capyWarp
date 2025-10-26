@@ -110,4 +110,7 @@
     <!-- Popup -->
     <string name="action_show_popup">Show popup</string>
     <string name="popup_title">CapyWarp Result</string>
+    
+    <!-- Help: How to run a prompt -->
+    <string name="help_how_to_run_body">- Texte : Sélectionnez du texte dans n’importe quelle application et touchez le bouton Warp! dans le menu de sélection (TRAITER LE TEXTE), puis choisissez un prompt.\n- Image/Fichier : Utilisez l’action Partager du système pour envoyer l’image ou le fichier à CapyWarp, puis choisissez un prompt.</string>
 </resources>
