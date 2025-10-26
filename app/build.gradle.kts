@@ -101,4 +101,16 @@ dependencies {
 
     // Compose reorderable list (stable drag-and-drop for LazyColumn)
     implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
+
+    // Add ViewTree owners and SavedState for overlay ComposeView lifecycle support
+    implementation("androidx.lifecycle:lifecycle-runtime:2.8.4")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
+    implementation("androidx.lifecycle:lifecycle-runtime-android:2.8.4")
+    implementation("androidx.savedstate:savedstate:1.2.1")
+    implementation("androidx.savedstate:savedstate-ktx:1.2.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.8.4")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.8.4")
+
+    // Markdown rendering
+    implementation("io.noties.markwon:core:4.6.2")
 }

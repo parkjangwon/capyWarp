@@ -111,4 +111,8 @@
     <string name="editor_section_result_action">Result handling</string>
 
     <string name="error_prompt_not_found">Prompt not found.</string>
+    
+    <!-- Popup -->
+    <string name="action_show_popup">Show popup</string>
+    <string name="popup_title">CapyWarp Result</string>
 </resources>

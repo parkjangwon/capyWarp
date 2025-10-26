@@ -206,50 +206,59 @@ class WarpProcessService : Service() {
 
                 when (prompt.outputType) {
                     0 -> { // text
-                        if (prompt.resultAction == 1) {
-                            // Clipboard copy (silent toast feedback)
-                            try {
-                                val cm = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                                val clip = android.content.ClipData.newPlainText("CapyWarp", result)
-                                cm.setPrimaryClip(clip)
-                                showToast(getString(org.parkjw.capywarp.R.string.toast_copy_text))
-                            } catch (e: Exception) {
-                                showError(getString(org.parkjw.capywarp.R.string.copy_failed, e.message ?: ""))
+                        when (prompt.resultAction) {
+                            1 -> {
+                                // Clipboard copy (silent toast feedback)
+                                try {
+                                    val cm = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                                    val clip = android.content.ClipData.newPlainText("CapyWarp", result)
+                                    cm.setPrimaryClip(clip)
+                                    showToast(getString(org.parkjw.capywarp.R.string.toast_copy_text))
+                                } catch (e: Exception) {
+                                    showError(getString(org.parkjw.capywarp.R.string.copy_failed, e.message ?: ""))
+                                }
                             }
-                        } else {
-                            // 알림에 클립보드 복사, 공유 액션 추가
-                            val copyTextIntent = Intent(this@WarpProcessService, WarpProcessService::class.java).apply {
-                                action = ACTION_COPY_TEXT
-                                putExtra(EXTRA_TEXT, result)
+                            4 -> {
+                                // External overlay popup only (no Activity fallback)
+                                serviceScope.launch(Dispatchers.Main) {
+                                    try { OverlayPopupManager.showText(this@WarpProcessService, result) } catch (_: Exception) {}
+                                }
                             }
-                            val piCopyText = PendingIntent.getService(
-                                this@WarpProcessService,
-                                REQ_COPY_TEXT,
-                                copyTextIntent,
-                                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                            )
-                            val shareText = Intent(Intent.ACTION_SEND).apply {
-                                type = "text/plain"
-                                putExtra(Intent.EXTRA_TEXT, result)
+                            else -> {
+                                // Show notification with actions
+                                val copyTextIntent = Intent(this@WarpProcessService, WarpProcessService::class.java).apply {
+                                    action = ACTION_COPY_TEXT
+                                    putExtra(EXTRA_TEXT, result)
+                                }
+                                val piCopyText = PendingIntent.getService(
+                                    this@WarpProcessService,
+                                    REQ_COPY_TEXT,
+                                    copyTextIntent,
+                                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                                )
+                                val shareText = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_TEXT, result)
+                                }
+                                val chooser = Intent.createChooser(shareText, getString(org.parkjw.capywarp.R.string.share_text_title)).apply {
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                }
+                                val piShareText = PendingIntent.getActivity(
+                                    this@WarpProcessService,
+                                    REQ_SHARE_TEXT,
+                                    chooser,
+                                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                                )
+                                val n: Notification = NotificationCompat.Builder(this@WarpProcessService, CHANNEL_ID)
+                                    .setSmallIcon(android.R.drawable.ic_dialog_info)
+                                    .setContentTitle(getString(org.parkjw.capywarp.R.string.notif_result_title))
+                                    .setContentText(result.take(40))
+                                    .setStyle(NotificationCompat.BigTextStyle().bigText(result))
+                                    .addAction(android.R.drawable.ic_menu_edit, getString(org.parkjw.capywarp.R.string.action_copy_to_clipboard), piCopyText)
+                                    .addAction(android.R.drawable.ic_menu_share, getString(org.parkjw.capywarp.R.string.action_share), piShareText)
+                                    .build()
+                                nm.notify(NOTI_ID_RESULT_TEXT, n)
                             }
-                            val chooser = Intent.createChooser(shareText, getString(org.parkjw.capywarp.R.string.share_text_title)).apply {
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                            }
-                            val piShareText = PendingIntent.getActivity(
-                                this@WarpProcessService,
-                                REQ_SHARE_TEXT,
-                                chooser,
-                                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                            )
-                            val n: Notification = NotificationCompat.Builder(this@WarpProcessService, CHANNEL_ID)
-                                .setSmallIcon(android.R.drawable.ic_dialog_info)
-                                .setContentTitle(getString(org.parkjw.capywarp.R.string.notif_result_title))
-                                .setContentText(result.take(40))
-                                .setStyle(NotificationCompat.BigTextStyle().bigText(result))
-                                .addAction(android.R.drawable.ic_menu_edit, getString(org.parkjw.capywarp.R.string.action_copy_to_clipboard), piCopyText)
-                                .addAction(android.R.drawable.ic_menu_share, getString(org.parkjw.capywarp.R.string.action_share), piShareText)
-                                .build()
-                            nm.notify(NOTI_ID_RESULT_TEXT, n)
                         }
                     }
                     else -> { // image
@@ -308,90 +317,104 @@ class WarpProcessService : Service() {
 
                         if (finalBitmap != null && finalBytes != null) {
                             val uri = cacheUri ?: writeImageToCacheAndGetUri(finalBytes!!, finalMime)
-                            val copyIntent = Intent(this@WarpProcessService, WarpProcessService::class.java).apply {
-                                action = ACTION_COPY_IMAGE
-                                data = uri
-                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                            }
-                            val saveIntent = Intent(this@WarpProcessService, WarpProcessService::class.java).apply {
-                                action = ACTION_SAVE_IMAGE
-                                data = uri
-                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                            }
-                            val piCopy = PendingIntent.getService(
-                                this@WarpProcessService,
-                                REQ_COPY,
-                                copyIntent,
-                                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                            )
-                            val piSave = PendingIntent.getService(
-                                this@WarpProcessService,
-                                REQ_SAVE,
-                                saveIntent,
-                                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                            )
-                            // 공유 액션: 바로 공유 시트를 Activity로 띄워 알림 패널을 닫고 전면 표시
-                            val sendIntent = Intent(Intent.ACTION_SEND).apply {
-                                type = "image/*"
-                                putExtra(Intent.EXTRA_STREAM, uri)
-                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                            }
-                            val chooser = Intent.createChooser(sendIntent, getString(org.parkjw.capywarp.R.string.share_image_title)).apply {
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                            }
-                            val piShare = PendingIntent.getActivity(
-                                this@WarpProcessService,
-                                REQ_SHARE,
-                                chooser,
-                                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                            )
+                            if (prompt.resultAction == 4 && uri != null) {
+                                // External overlay popup only (no Activity fallback)
+                                serviceScope.launch(Dispatchers.Main) {
+                                    try { OverlayPopupManager.showImage(this@WarpProcessService, uri) } catch (_: Exception) {}
+                                }
+                            } else {
+                                val copyIntent = Intent(this@WarpProcessService, WarpProcessService::class.java).apply {
+                                    action = ACTION_COPY_IMAGE
+                                    data = uri
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
+                                val saveIntent = Intent(this@WarpProcessService, WarpProcessService::class.java).apply {
+                                    action = ACTION_SAVE_IMAGE
+                                    data = uri
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
+                                val piCopy = PendingIntent.getService(
+                                    this@WarpProcessService,
+                                    REQ_COPY,
+                                    copyIntent,
+                                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                                )
+                                val piSave = PendingIntent.getService(
+                                    this@WarpProcessService,
+                                    REQ_SAVE,
+                                    saveIntent,
+                                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                                )
+                                // 공유 액션: 바로 공유 시트를 Activity로 띄워 알림 패널을 닫고 전면 표시
+                                val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "image/*"
+                                    putExtra(Intent.EXTRA_STREAM, uri)
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
+                                val chooser = Intent.createChooser(sendIntent, getString(org.parkjw.capywarp.R.string.share_image_title)).apply {
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                }
+                                val piShare = PendingIntent.getActivity(
+                                    this@WarpProcessService,
+                                    REQ_SHARE,
+                                    chooser,
+                                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                                )
 
-                            val n: Notification = NotificationCompat.Builder(this@WarpProcessService, CHANNEL_ID)
-                                .setSmallIcon(android.R.drawable.ic_dialog_info)
-                                .setContentTitle(getString(org.parkjw.capywarp.R.string.notif_image_result_title))
-                                .setContentText(getString(org.parkjw.capywarp.R.string.notif_image_result_text))
-                                .setStyle(NotificationCompat.BigPictureStyle().bigPicture(finalBitmap!!))
-                                .addAction(android.R.drawable.ic_menu_edit, getString(org.parkjw.capywarp.R.string.action_copy_to_clipboard), piCopy)
-                                .addAction(android.R.drawable.ic_menu_save, getString(org.parkjw.capywarp.R.string.action_save_gallery), piSave)
-                                .addAction(android.R.drawable.ic_menu_share, getString(org.parkjw.capywarp.R.string.action_share), piShare)
-                                .build()
-                            nm.notify(NOTI_ID_RESULT_IMAGE, n)
+                                val n: Notification = NotificationCompat.Builder(this@WarpProcessService, CHANNEL_ID)
+                                    .setSmallIcon(android.R.drawable.ic_dialog_info)
+                                    .setContentTitle(getString(org.parkjw.capywarp.R.string.notif_image_result_title))
+                                    .setContentText(getString(org.parkjw.capywarp.R.string.notif_image_result_text))
+                                    .setStyle(NotificationCompat.BigPictureStyle().bigPicture(finalBitmap!!))
+                                    .addAction(android.R.drawable.ic_menu_edit, getString(org.parkjw.capywarp.R.string.action_copy_to_clipboard), piCopy)
+                                    .addAction(android.R.drawable.ic_menu_save, getString(org.parkjw.capywarp.R.string.action_save_gallery), piSave)
+                                    .addAction(android.R.drawable.ic_menu_share, getString(org.parkjw.capywarp.R.string.action_share), piShare)
+                                    .build()
+                                nm.notify(NOTI_ID_RESULT_IMAGE, n)
+                            }
                         } else {
                             // 이미지가 아니라고 판단되면 텍스트 알림으로 대체
                             val textResult = currentResult.trim().ifBlank { lastErr ?: "" }
                             if (textResult.isNotBlank()) {
-                                val copyTextIntent = Intent(this@WarpProcessService, WarpProcessService::class.java).apply {
-                                    action = ACTION_COPY_TEXT
-                                    putExtra(EXTRA_TEXT, textResult)
+                                if (prompt.resultAction == 4) {
+                                    // External overlay popup only (no Activity fallback)
+                                    serviceScope.launch(Dispatchers.Main) {
+                                        try { OverlayPopupManager.showText(this@WarpProcessService, textResult) } catch (_: Exception) {}
+                                    }
+                                } else {
+                                    val copyTextIntent = Intent(this@WarpProcessService, WarpProcessService::class.java).apply {
+                                        action = ACTION_COPY_TEXT
+                                        putExtra(EXTRA_TEXT, textResult)
+                                    }
+                                    val piCopyText = PendingIntent.getService(
+                                        this@WarpProcessService,
+                                        REQ_COPY_TEXT,
+                                        copyTextIntent,
+                                        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                                    )
+                                    val shareText = Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_TEXT, textResult)
+                                    }
+                                    val chooser = Intent.createChooser(shareText, getString(org.parkjw.capywarp.R.string.share_text_title)).apply {
+                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                    }
+                                    val piShareText = PendingIntent.getActivity(
+                                        this@WarpProcessService,
+                                        REQ_SHARE_TEXT,
+                                        chooser,
+                                        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                                    )
+                                    val n: Notification = NotificationCompat.Builder(this@WarpProcessService, CHANNEL_ID)
+                                        .setSmallIcon(android.R.drawable.ic_dialog_info)
+                                        .setContentTitle(getString(org.parkjw.capywarp.R.string.notif_result_title))
+                                        .setContentText(textResult.take(40))
+                                        .setStyle(NotificationCompat.BigTextStyle().bigText(textResult))
+                                        .addAction(android.R.drawable.ic_menu_edit, getString(org.parkjw.capywarp.R.string.action_copy_to_clipboard), piCopyText)
+                                        .addAction(android.R.drawable.ic_menu_share, getString(org.parkjw.capywarp.R.string.action_share), piShareText)
+                                        .build()
+                                    nm.notify(NOTI_ID_RESULT_TEXT, n)
                                 }
-                                val piCopyText = PendingIntent.getService(
-                                    this@WarpProcessService,
-                                    REQ_COPY_TEXT,
-                                    copyTextIntent,
-                                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                                )
-                                val shareText = Intent(Intent.ACTION_SEND).apply {
-                                    type = "text/plain"
-                                    putExtra(Intent.EXTRA_TEXT, textResult)
-                                }
-                                val chooser = Intent.createChooser(shareText, getString(org.parkjw.capywarp.R.string.share_text_title)).apply {
-                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                                }
-                                val piShareText = PendingIntent.getActivity(
-                                    this@WarpProcessService,
-                                    REQ_SHARE_TEXT,
-                                    chooser,
-                                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                                )
-                                val n: Notification = NotificationCompat.Builder(this@WarpProcessService, CHANNEL_ID)
-                                    .setSmallIcon(android.R.drawable.ic_dialog_info)
-                                    .setContentTitle(getString(org.parkjw.capywarp.R.string.notif_result_title))
-                                    .setContentText(textResult.take(40))
-                                    .setStyle(NotificationCompat.BigTextStyle().bigText(textResult))
-                                    .addAction(android.R.drawable.ic_menu_edit, getString(org.parkjw.capywarp.R.string.action_copy_to_clipboard), piCopyText)
-                                    .addAction(android.R.drawable.ic_menu_share, getString(org.parkjw.capywarp.R.string.action_share), piShareText)
-                                    .build()
-                                nm.notify(NOTI_ID_RESULT_TEXT, n)
                             } else {
                                 showError(lastErr ?: "이미지 데이터를 해석할 수 없습니다.")
                             }

@@ -6,7 +6,7 @@
 
 CapyWarp is a lightweight Android utility that integrates into the OS, letting you send selected text or shared images to your favorite AI model via prompts you define.
 
-It works from anywhere using the Android share sheet (for images) or the text selection menu (`PROCESS_TEXT`) and delivers the result back as a notification, clipboard copy, or saved image—all configurable per prompt.
+It works from anywhere using the Android share sheet (for images) or the text selection menu (`PROCESS_TEXT`) and delivers the result back as a notification, popup window, clipboard copy, or saved image—all configurable per prompt.
 
 ## ✨ Key Features
 

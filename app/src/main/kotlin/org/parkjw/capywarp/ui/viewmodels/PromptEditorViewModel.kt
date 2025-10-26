@@ -46,8 +46,15 @@ class PromptEditorViewModel @Inject constructor(
                 val p = repository.getPrompt(promptId)
                 if (p != null) {
                     val coercedAction = when (p.outputType) {
-                        0 -> if (p.resultAction == 0) 2 else p.resultAction.coerceIn(1, 2)
-                        else -> if (p.resultAction == 1) 2 else p.resultAction.coerceIn(2, 3)
+                        0 -> when {
+                            p.resultAction == 0 -> 2
+                            p.resultAction == 3 -> 2 // text mode doesn't support save gallery
+                            else -> listOf(1, 2, 4).firstOrNull { it == p.resultAction } ?: 2
+                        }
+                        else -> when {
+                            p.resultAction == 1 -> 2 // image mode doesn't support clipboard
+                            else -> listOf(2, 3, 4).firstOrNull { it == p.resultAction } ?: 2
+                        }
                     }
                     _uiState.value = UiState(
                         id = p.id,
@@ -78,8 +85,14 @@ class PromptEditorViewModel @Inject constructor(
     fun updateOutputType(value: Int) {
         val current = _uiState.value
         val coercedResultAction = when (value) {
-            0 -> current.resultAction.coerceIn(1, 2) // 텍스트 모드: 1,2만 허용
-            else -> current.resultAction.coerceIn(2, 3) // 이미지 모드: 2,3만 허용 (클립보드 제거)
+            0 -> when (current.resultAction) {
+                1, 2, 4 -> current.resultAction
+                else -> 2
+            }
+            else -> when (current.resultAction) {
+                2, 3, 4 -> current.resultAction
+                else -> 2
+            }
         }
         _uiState.value = current.copy(outputType = value, resultAction = coercedResultAction, error = null, message = null)
         scheduleAutoSave()

@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+        <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:name=".CapyWarpApplication"
@@ -70,6 +71,13 @@
             android:name=".ui.WarpProcessService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+
+        <activity
+            android:name=".ui.ResultPopupActivity"
+            android:exported="false"
+            android:theme="@style/Theme.CapyWarp.Transparent"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -154,6 +154,10 @@ private fun ResultActionSelector(outputType: Int, selected: Int, onSelected: (In
                 RadioButton(selected = selected == 1, onClick = { onSelected(1) }, colors = radioColors)
                 Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.editor_action_clipboard), color = if (selected == 1) selectedTextColor else unselectedTextColor)
             }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(selected = selected == 4, onClick = { onSelected(4) }, colors = radioColors)
+                Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_popup), color = if (selected == 4) selectedTextColor else unselectedTextColor)
+            }
         } else {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 RadioButton(selected = selected == 2, onClick = { onSelected(2) }, colors = radioColors)
@@ -162,6 +166,10 @@ private fun ResultActionSelector(outputType: Int, selected: Int, onSelected: (In
             Row(verticalAlignment = Alignment.CenterVertically) {
                 RadioButton(selected = selected == 3, onClick = { onSelected(3) }, colors = radioColors)
                 Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.editor_action_save_gallery), color = if (selected == 3) selectedTextColor else unselectedTextColor)
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(selected = selected == 4, onClick = { onSelected(4) }, colors = radioColors)
+                Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_popup), color = if (selected == 4) selectedTextColor else unselectedTextColor)
             }
         }
     }

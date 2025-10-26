@@ -370,12 +370,14 @@ class WarpRouterActivity : ComponentActivity() {
                                                     when (prompt.resultAction) {
                                                         1 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_copy_to_clipboard)
                                                         2 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_notification)
+                                                        4 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_popup)
                                                         else -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_process_result)
                                                     }
                                                 } else {
                                                     when (prompt.resultAction) {
                                                         2 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_notification_image)
                                                         3 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_save_gallery)
+                                                        4 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_popup)
                                                         else -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_process_result)
                                                     }
                                                 }

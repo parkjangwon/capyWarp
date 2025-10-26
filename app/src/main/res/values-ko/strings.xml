@@ -117,4 +117,8 @@
 
     <!-- Errors -->
     <string name="error_prompt_not_found">프롬프트를 찾을 수 없습니다.</string>
+
+    <!-- Popup -->
+    <string name="action_show_popup">팝업으로 표시</string>
+    <string name="popup_title">CapyWarp 결과</string>
 </resources>
