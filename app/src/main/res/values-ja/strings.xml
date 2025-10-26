@@ -67,7 +67,7 @@
     <string name="settings_image_model_label">Image model</string>
     <string name="settings_tip_title">Tip</string>
     <string name="settings_tip_free_plan">On the free plan, requests per minute are limited. The app retries automatically with a short delay when limits are hit.</string>
-    <string name="settings_user_prompt_section">User prompt (always applied)</string>
+    <string name="settings_user_prompt_section">グローバルプロンプト</string>
     <string name="settings_user_prompt_label">Always include this instruction</string>
     <string name="settings_user_prompt_support">Example: Please always answer in Korean politely.</string>
     <string name="settings_backup_section">Backup &amp; Restore</string>

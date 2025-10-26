@@ -71,7 +71,7 @@
     <string name="settings_image_model_label">이미지 모델</string>
     <string name="settings_tip_title">팁</string>
     <string name="settings_tip_free_plan">무료 플랜에서는 분당 요청이 제한됩니다. 앱은 제한에 도달하면 자동으로 짧은 지연 후 재시도합니다.</string>
-    <string name="settings_user_prompt_section">사용자 프롬프트(항상 적용)</string>
+    <string name="settings_user_prompt_section">공통 프롬프트</string>
     <string name="settings_user_prompt_label">항상 포함할 지시문</string>
     <string name="settings_user_prompt_support">예: 항상 공손한 한국어로 답변해 주세요.</string>
     <string name="settings_backup_section">백업 및 복원</string>
