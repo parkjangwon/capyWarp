@@ -136,10 +136,10 @@ fun PromptEditorScreen(
 
 @Composable
 private fun ResultActionSelector(outputType: Int, selected: Int, onSelected: (Int) -> Unit) {
-    val selectedTextColor = androidx.compose.ui.graphics.Color.White
+    val selectedTextColor = MaterialTheme.colorScheme.primary
     val unselectedTextColor = MaterialTheme.colorScheme.onSurface
     val radioColors = androidx.compose.material3.RadioButtonDefaults.colors(
-        selectedColor = androidx.compose.ui.graphics.Color.White,
+        selectedColor = MaterialTheme.colorScheme.primary,
         unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
         disabledSelectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
         disabledUnselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -177,10 +177,10 @@ private fun ResultActionSelector(outputType: Int, selected: Int, onSelected: (In
 
 @Composable
 private fun OutputTypeSelector(selected: Int, onSelected: (Int) -> Unit) {
-    val selectedTextColor = androidx.compose.ui.graphics.Color.White
+    val selectedTextColor = MaterialTheme.colorScheme.primary
     val unselectedTextColor = MaterialTheme.colorScheme.onSurface
     val radioColors = androidx.compose.material3.RadioButtonDefaults.colors(
-        selectedColor = androidx.compose.ui.graphics.Color.White,
+        selectedColor = MaterialTheme.colorScheme.primary,
         unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
         disabledSelectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
         disabledUnselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
