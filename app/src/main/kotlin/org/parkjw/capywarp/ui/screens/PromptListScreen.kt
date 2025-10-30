@@ -76,6 +76,12 @@ fun PromptListScreen(
 
     // Clear selection and scroll to top on query change
     val listState = rememberLazyListState()
+    // Delay empty-state for a brief moment to avoid initial flicker on cold start
+    var allowEmpty by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        try { kotlinx.coroutines.delay(220) } catch (_: Exception) {}
+        allowEmpty = true
+    }
     LaunchedEffect(query) {
         selectionMode = false
         selectedIds = emptySet()
@@ -228,16 +234,17 @@ fun PromptListScreen(
     ) { paddingValues ->
         val scope = rememberCoroutineScope()
         if (prompts.isEmpty()) {
-            // 빈 상태 표시
             Box(modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)) {
-                Text(
-                    text = androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.no_prompts_message),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                if (allowEmpty) {
+                    Text(
+                        text = androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.no_prompts_message),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
             }
         } else {
             val hapticsLocal = androidx.compose.ui.platform.LocalHapticFeedback.current

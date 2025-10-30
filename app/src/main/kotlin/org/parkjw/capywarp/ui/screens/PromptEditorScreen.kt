@@ -249,15 +249,37 @@ fun PromptEditorScreen(
                                 }
                             },
                             confirmButton = {
-                                TextButton(onClick = {
-                                    val newText = genResult!!
-                                    templateFieldState.value = androidx.compose.ui.text.input.TextFieldValue(
-                                        text = newText,
-                                        selection = androidx.compose.ui.text.TextRange(newText.length)
-                                    )
-                                    viewModel.updateTemplate(newText)
-                                    showConfirm = false
-                                }) { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.editor_use_this_prompt)) }
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    // Retry button: re-request with the same input without leaving the flow
+                                    TextButton(onClick = {
+                                        showConfirm = false
+                                        genError = null
+                                        genLoading = true
+                                        scope.launch {
+                                            val res = viewModel.improvePromptFromIntent(genInput)
+                                            genLoading = false
+                                            res.onSuccess { text ->
+                                                genResult = text
+                                                showConfirm = true
+                                            }.onFailure { e ->
+                                                // Go back to input dialog with error so the user can adjust
+                                                genError = e.message ?: "Error"
+                                                showGenDialog = true
+                                            }
+                                        }
+                                    }) { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.editor_retry)) }
+
+                                    // Use this prompt
+                                    TextButton(onClick = {
+                                        val newText = genResult!!
+                                        templateFieldState.value = androidx.compose.ui.text.input.TextFieldValue(
+                                            text = newText,
+                                            selection = androidx.compose.ui.text.TextRange(newText.length)
+                                        )
+                                        viewModel.updateTemplate(newText)
+                                        showConfirm = false
+                                    }) { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.editor_use_this_prompt)) }
+                                }
                             },
                             dismissButton = {
                                 TextButton(onClick = { showConfirm = false }) { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.cancel)) }

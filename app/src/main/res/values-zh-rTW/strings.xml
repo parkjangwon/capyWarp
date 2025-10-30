@@ -129,6 +129,7 @@
     <string name="editor_apply_generated_question">要使用這個產生的提示詞嗎？</string>
     <string name="editor_replace_warning">現有模板將被取代。</string>
     <string name="editor_use_this_prompt">使用此提示詞</string>
+    <string name="editor_retry">重新請求</string>
     
     <!-- Missing API key prompt -->
     <string name="gemini_key_required_title">需要 Gemini API 金鑰</string>

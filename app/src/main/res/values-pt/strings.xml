@@ -149,6 +149,7 @@
     <string name="editor_apply_generated_question">Use this generated prompt?</string>
     <string name="editor_replace_warning">Existing template will be replaced.</string>
     <string name="editor_use_this_prompt">Use this prompt</string>
+    <string name="editor_retry">Retry</string>
     
     <!-- Missing API key prompt -->
     <string name="gemini_key_required_title">Gemini API key required</string>

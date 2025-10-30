@@ -151,6 +151,7 @@
     <string name="editor_apply_generated_question">この生成されたプロンプトを使用しますか？</string>
     <string name="editor_replace_warning">既存のテンプレートは置き換えられます。</string>
     <string name="editor_use_this_prompt">このプロンプトを使用</string>
+    <string name="editor_retry">再リクエスト</string>
     
     <!-- Missing API key prompt -->
     <string name="gemini_key_required_title">Gemini API key required</string>
