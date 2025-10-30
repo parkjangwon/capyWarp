@@ -34,7 +34,8 @@ fun HelpScreen(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
             )
-        }
+        },
+        bottomBar = { org.parkjw.capywarp.ui.components.BannerAd(modifier = Modifier.fillMaxWidth()) }
     ) { paddingValues ->
         Column(
             modifier = modifier

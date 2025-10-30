@@ -82,7 +82,8 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {},
-        snackbarHost = { SnackbarHost(hostState = snackbarHost) }
+        snackbarHost = { SnackbarHost(hostState = snackbarHost) },
+        bottomBar = { org.parkjw.capywarp.ui.components.BannerAd(modifier = Modifier.fillMaxWidth()) }
     ) { paddingValues ->
         // 스크롤 지원을 위해 verticalScroll 적용
         Column(

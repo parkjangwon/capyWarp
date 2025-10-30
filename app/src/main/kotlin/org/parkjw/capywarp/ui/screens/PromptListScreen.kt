@@ -223,7 +223,7 @@ fun PromptListScreen(
             }
         },
         bottomBar = {
-            // Multi-select actions moved to TopAppBar as icon buttons; no bottom bar actions.
+            org.parkjw.capywarp.ui.components.BannerAd(modifier = Modifier.fillMaxWidth())
         }
     ) { paddingValues ->
         val scope = rememberCoroutineScope()

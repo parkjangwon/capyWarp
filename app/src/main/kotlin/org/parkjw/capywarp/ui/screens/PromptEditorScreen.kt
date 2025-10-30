@@ -48,7 +48,8 @@ fun PromptEditorScreen(
     val ctx = LocalContext.current
 
     Scaffold(
-        topBar = {}
+        topBar = {},
+        bottomBar = { org.parkjw.capywarp.ui.components.BannerAd(modifier = Modifier.fillMaxWidth()) }
     ) { paddingValues ->
         Column(
             modifier = modifier

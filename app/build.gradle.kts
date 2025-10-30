@@ -113,4 +113,7 @@ dependencies {
 
     // Markdown rendering
     implementation("io.noties.markwon:core:4.6.2")
+
+    // Google Mobile Ads SDK (AdMob)
+    implementation("com.google.android.gms:play-services-ads:23.3.0")
 }
