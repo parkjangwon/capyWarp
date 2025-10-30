@@ -158,6 +158,21 @@ class WarpProcessService : Service() {
             stopSelf(startId)
             return START_NOT_STICKY
         }
+        // Guard: require Gemini API key
+        try {
+            val apiKey = settingsRepository.getApiKey()
+            if (apiKey.isBlank()) {
+                showError(getString(org.parkjw.capywarp.R.string.gemini_key_required_message))
+                stopSelf(startId)
+                return START_NOT_STICKY
+            }
+        } catch (_: Exception) {
+            // If any exception occurs while reading settings, fail gracefully
+            showError(getString(org.parkjw.capywarp.R.string.gemini_key_required_message))
+            stopSelf(startId)
+            return START_NOT_STICKY
+        }
+
         ensureChannel()
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val progressNotification = NotificationCompat.Builder(this, CHANNEL_ID)

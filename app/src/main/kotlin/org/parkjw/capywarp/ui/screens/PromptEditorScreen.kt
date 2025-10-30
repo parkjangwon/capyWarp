@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -23,9 +25,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import kotlinx.coroutines.launch
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.parkjw.capywarp.ui.viewmodels.PromptEditorViewModel
@@ -39,6 +45,7 @@ fun PromptEditorScreen(
     viewModel: PromptEditorViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    val ctx = LocalContext.current
 
     Scaffold(
         topBar = {}
@@ -88,8 +95,57 @@ fun PromptEditorScreen(
                             .fillMaxWidth()
                             .heightIn(min = 120.dp, max = 240.dp)
                     )
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        TextButton(onClick = {
+                    val scope = androidx.compose.runtime.rememberCoroutineScope()
+                    var showGenDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+                    var genInput by rememberSaveable { androidx.compose.runtime.mutableStateOf("") }
+                    var genLoading by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+                    var genError by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
+                    var genResult by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
+                    var showConfirm by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        // Left: Generate Prompt button
+                        // API key pre-check via SettingsViewModel
+                        val settingsVm: org.parkjw.capywarp.ui.viewmodels.SettingsViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+                        val apiKey by settingsVm.apiKey.collectAsState()
+                        var showKeyDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+
+                        if (showKeyDialog) {
+                            androidx.compose.material3.AlertDialog(
+                                onDismissRequest = { showKeyDialog = false },
+                                title = { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.gemini_key_required_title)) },
+                                text = { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.gemini_key_required_message)) },
+                                confirmButton = {
+                                    TextButton(onClick = {
+                                        showKeyDialog = false
+                                        val intent = android.content.Intent(ctx, org.parkjw.capywarp.ui.MainActivity::class.java).apply {
+                                            putExtra("OPEN_SETTINGS", true)
+                                            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        }
+                                        ctx.startActivity(intent)
+                                    }) { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.go_to_settings)) }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { showKeyDialog = false }) { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.cancel)) }
+                                }
+                            )
+                        }
+
+                        Button(onClick = {
+                            if (apiKey.isBlank()) {
+                                showKeyDialog = true
+                                return@Button
+                            }
+                            genInput = ""
+                            genError = null
+                            genResult = null
+                            showGenDialog = true
+                        }) {
+                            Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.editor_generate_prompt))
+                        }
+
+                        // Right: $TEXT insert button (apply primary button design)
+                        Button(onClick = {
                             val token = "\$TEXT"
                             val current = templateFieldState.value
                             val sel = current.selection
@@ -109,6 +165,103 @@ fun PromptEditorScreen(
                         }) {
                             Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.editor_insert_text_token))
                         }
+                    }
+
+                    // Generate Prompt input dialog
+                    if (showGenDialog) {
+                        androidx.compose.material3.AlertDialog(
+                            onDismissRequest = { if (!genLoading) showGenDialog = false },
+                            title = { Text(text = androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.editor_generate_prompt)) },
+                            text = {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    OutlinedTextField(
+                                        value = genInput,
+                                        onValueChange = { genInput = it; genError = null },
+                                        label = { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.editor_generate_prompt_hint)) },
+                                        minLines = 3,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                    if (genError != null) {
+                                        Text(genError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                                    }
+                                    if (genLoading) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            androidx.compose.material3.CircularProgressIndicator(modifier = Modifier.height(20.dp))
+                                            Spacer(Modifier.width(8.dp))
+                                            Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.editor_generating))
+                                        }
+                                    }
+                                }
+                            },
+                            confirmButton = {
+                                TextButton(enabled = !genLoading, onClick = {
+                                    if (genInput.isBlank()) {
+                                        genError = ctx.getString(org.parkjw.capywarp.R.string.editor_input_required)
+                                        return@TextButton
+                                    }
+                                    genLoading = true
+                                    genError = null
+                                    scope.launch {
+                                        val res = viewModel.improvePromptFromIntent(genInput)
+                                        genLoading = false
+                                        res.onSuccess { text ->
+                                            genResult = text
+                                            showGenDialog = false
+                                            showConfirm = true
+                                        }.onFailure { e ->
+                                            genError = e.message ?: "Error"
+                                        }
+                                    }
+                                }) { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.editor_request)) }
+                            },
+                            dismissButton = {
+                                TextButton(enabled = !genLoading, onClick = { showGenDialog = false }) { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.close)) }
+                            }
+                        )
+                    }
+
+                    // Confirmation dialog with preview
+                    if (showConfirm && genResult != null) {
+                        val willReplace = state.template.isNotBlank()
+                        androidx.compose.material3.AlertDialog(
+                            onDismissRequest = { showConfirm = false },
+                            title = { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.editor_apply_generated_question)) },
+                            text = {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    if (willReplace) {
+                                        Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.editor_replace_warning), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                                    }
+                                    val previewScroll = rememberScrollState()
+                                    androidx.compose.material3.ElevatedCard(Modifier.fillMaxWidth()) {
+                                        Box(
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .heightIn(min = 80.dp, max = 220.dp)
+                                                .verticalScroll(previewScroll)
+                                        ) {
+                                            Text(
+                                                text = genResult!!,
+                                                modifier = Modifier.padding(12.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            },
+                            confirmButton = {
+                                TextButton(onClick = {
+                                    val newText = genResult!!
+                                    templateFieldState.value = androidx.compose.ui.text.input.TextFieldValue(
+                                        text = newText,
+                                        selection = androidx.compose.ui.text.TextRange(newText.length)
+                                    )
+                                    viewModel.updateTemplate(newText)
+                                    showConfirm = false
+                                }) { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.editor_use_this_prompt)) }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showConfirm = false }) { Text(androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.cancel)) }
+                            }
+                        )
                     }
                 }
             }

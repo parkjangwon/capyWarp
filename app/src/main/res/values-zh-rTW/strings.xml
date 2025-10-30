@@ -119,4 +119,19 @@
     <string name="search_hint">Search prompts</string>
     <string name="clear_search">Clear search</string>
     <string name="no_results_message">No results found.</string>
+
+    <!-- Editor: Generate Prompt -->
+    <string name="editor_generate_prompt">產生提示詞</string>
+    <string name="editor_generate_prompt_hint">描述你想做的事情</string>
+    <string name="editor_request">請求</string>
+    <string name="editor_input_required">請輸入你想做的事情。</string>
+    <string name="editor_generating">產生中…</string>
+    <string name="editor_apply_generated_question">要使用這個產生的提示詞嗎？</string>
+    <string name="editor_replace_warning">現有模板將被取代。</string>
+    <string name="editor_use_this_prompt">使用此提示詞</string>
+    
+    <!-- Missing API key prompt -->
+    <string name="gemini_key_required_title">需要 Gemini API 金鑰</string>
+    <string name="gemini_key_required_message">尚未設定 Gemini API 金鑰。請在設定中新增您的 API 金鑰以啟用 AI 功能。</string>
+    <string name="go_to_settings">前往設定</string>
 </resources>

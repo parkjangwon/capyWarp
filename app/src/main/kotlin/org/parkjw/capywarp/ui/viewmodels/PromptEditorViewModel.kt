@@ -17,6 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PromptEditorViewModel @Inject constructor(
     private val repository: PromptRepository,
+    private val geminiRepository: org.parkjw.capywarp.domain.repository.GeminiRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -39,6 +40,25 @@ class PromptEditorViewModel @Inject constructor(
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     private var autoSaveJob: Job? = null
+
+    suspend fun improvePromptFromIntent(intent: String): Result<String> {
+        return try {
+            // Compose a temporary prompt instructing Gemini to improve the user's intent into a high-quality prompt
+            val tmp = org.parkjw.capywarp.data.model.Prompt(
+                id = 0,
+                title = "Prompt Improver",
+                content = "",
+                template = "사용자가 입력한 텍스트를 분석하고 최적의 결과를 얻을 수 있도록 프롬프트를 개선해줘.\n\n사용자 입력:\n\$TEXT\n\n지침:\n- 불필요한 수식어를 제거하고 구체적으로 작성해.\n- \$TEXT 같은 토큰을 포함해야 한다면 적절한 위치에 포함해.\n- 최종 출력에는 개선된 프롬프트 텍스트만 포함해.",
+                resultAction = 2,
+                outputType = 0,
+                order = 0
+            )
+            val result = geminiRepository.generateContent(intent, tmp, null, null)
+            Result.success(result.trim())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
     init {
         if (promptId != null && promptId >= 0) {

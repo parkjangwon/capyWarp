@@ -72,6 +72,18 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     val navController = rememberNavController()
 
+                    // Handle deep link/extra to open Settings directly (e.g., from key-required prompts)
+                    var handledOpenSettings by remember { mutableStateOf(false) }
+                    LaunchedEffect(Unit) {
+                        val open = intent?.getBooleanExtra("OPEN_SETTINGS", false) == true
+                        if (open && !handledOpenSettings) {
+                            handledOpenSettings = true
+                            // clear the extra to avoid loops when activity is reused
+                            intent?.removeExtra("OPEN_SETTINGS")
+                            navController.navigate("settings")
+                        }
+                    }
+
                     NavHost(
                         navController = navController,
                         startDestination = "prompts"

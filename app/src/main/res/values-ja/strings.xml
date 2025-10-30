@@ -141,4 +141,19 @@
     <string name="search_hint">Search prompts</string>
     <string name="clear_search">Clear search</string>
     <string name="no_results_message">No results found.</string>
+
+    <!-- Editor: Generate Prompt -->
+    <string name="editor_generate_prompt">プロンプト生成</string>
+    <string name="editor_generate_prompt_hint">やりたいことを説明してください</string>
+    <string name="editor_request">リクエスト</string>
+    <string name="editor_input_required">入力してください。</string>
+    <string name="editor_generating">生成中…</string>
+    <string name="editor_apply_generated_question">この生成されたプロンプトを使用しますか？</string>
+    <string name="editor_replace_warning">既存のテンプレートは置き換えられます。</string>
+    <string name="editor_use_this_prompt">このプロンプトを使用</string>
+    
+    <!-- Missing API key prompt -->
+    <string name="gemini_key_required_title">Gemini API key required</string>
+    <string name="gemini_key_required_message">No Gemini API key is set. Please add your API key in Settings to enable AI features.</string>
+    <string name="go_to_settings">Go to Settings</string>
 </resources>

@@ -102,6 +102,20 @@
     <string name="editor_action_save_gallery">Save to gallery</string>
     <string name="editor_output_text">Text</string>
     <string name="editor_output_image">Image</string>
+    <!-- Editor: Generate Prompt -->
+    <string name="editor_generate_prompt">AI Generate Prompt</string>
+    <string name="editor_generate_prompt_hint">Describe what you want to do</string>
+    <string name="editor_request">Request</string>
+    <string name="editor_input_required">Please enter what you want to do.</string>
+    <string name="editor_generating">Generating…</string>
+    <string name="editor_apply_generated_question">Use this generated prompt?</string>
+    <string name="editor_replace_warning">Existing template will be replaced.</string>
+    <string name="editor_use_this_prompt">Use this prompt</string>
+
+    <!-- Missing API key prompt -->
+    <string name="gemini_key_required_title">Gemini API key required</string>
+    <string name="gemini_key_required_message">No Gemini API key is set. Please add your API key in Settings to enable AI features.</string>
+    <string name="go_to_settings">Go to Settings</string>
 
     <!-- Settings extra texts -->
     <string name="settings_api_hint">Enter your Gemini API key to enable AI processing.</string>

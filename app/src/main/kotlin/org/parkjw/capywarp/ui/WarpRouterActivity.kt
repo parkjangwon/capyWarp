@@ -28,6 +28,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 @OptIn(ExperimentalMaterial3Api::class)
 class WarpRouterActivity : ComponentActivity() {
+    @javax.inject.Inject lateinit var settingsRepository: org.parkjw.capywarp.domain.repository.SettingsRepository
     private var pendingNotificationText: String? = null
     private var pendingNotificationImageBytes: ByteArray? = null
     private val REQ_POST_NOTI = 5001
@@ -158,6 +159,21 @@ class WarpRouterActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Guard: require Gemini API key before allowing prompt execution via router
+        try {
+            val apiKey = settingsRepository.getApiKey()
+            if (apiKey.isBlank()) {
+                android.widget.Toast.makeText(this, getString(org.parkjw.capywarp.R.string.gemini_key_required_message), android.widget.Toast.LENGTH_LONG).show()
+                val i = Intent(this, MainActivity::class.java).apply {
+                    putExtra("OPEN_SETTINGS", true)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(i)
+                finish()
+                return
+            }
+        } catch (_: Exception) { /* ignore and continue */ }
 
         val action = intent?.action
         val type = intent?.type
