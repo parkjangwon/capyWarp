@@ -115,4 +115,8 @@
     <!-- Popup -->
     <string name="action_show_popup">Show popup</string>
     <string name="popup_title">CapyWarp Result</string>
+    <!-- Search / Filter -->
+    <string name="search_hint">Search prompts</string>
+    <string name="clear_search">Clear search</string>
+    <string name="no_results_message">No results found.</string>
 </resources>

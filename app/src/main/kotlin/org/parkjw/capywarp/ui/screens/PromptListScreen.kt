@@ -32,14 +32,20 @@ import androidx.compose.material.icons.filled.Reorder
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import org.burnoutcrew.reorderable.detectReorderAfterLongPress
 import org.burnoutcrew.reorderable.rememberReorderableLazyListState
 import org.burnoutcrew.reorderable.reorderable
 import org.burnoutcrew.reorderable.ReorderableItem
+import androidx.compose.foundation.layout.size
+import androidx.compose.animation.Crossfade
 
 
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
@@ -51,11 +57,14 @@ fun PromptListScreen(
     modifier: Modifier = Modifier
 ) {
     val prompts by viewModel.prompts.collectAsState(initial = emptyList())
+    val query by viewModel.query.collectAsState()
+    val filtered by viewModel.filteredPrompts.collectAsState(initial = emptyList())
+
     var selectionMode by remember { mutableStateOf(false) }
     var selectedIds by remember { mutableStateOf(setOf<Int>()) }
     var showConfirm by remember { mutableStateOf(false) }
 
-    // Use SnapshotStateList for stable in-place reordering without recreating the list on every move
+    // Use SnapshotStateList for stable in-place reordering without recreating the list on every move (only for full list mode)
     val localList = remember { androidx.compose.runtime.mutableStateListOf<org.parkjw.capywarp.data.model.Prompt>() }
     // Seed/refresh contents only when backing data changes (preserve current order while dragging)
     LaunchedEffect(prompts) {
@@ -63,6 +72,14 @@ fun PromptListScreen(
         // Replace contents while minimizing churn
         localList.clear()
         localList.addAll(ordered)
+    }
+
+    // Clear selection and scroll to top on query change
+    val listState = rememberLazyListState()
+    LaunchedEffect(query) {
+        selectionMode = false
+        selectedIds = emptySet()
+        listState.scrollToItem(0)
     }
 
     fun toggleSelect(id: Int) {
@@ -91,12 +108,66 @@ fun PromptListScreen(
     }
 
     val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+    val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+
+    // Search mode toggle + focus requester for smooth UX
+    var searchMode by remember { mutableStateOf(false) }
+    val searchFocusRequester = remember { FocusRequester() }
+    LaunchedEffect(searchMode) {
+        if (searchMode) {
+            try { searchFocusRequester.requestFocus() } catch (_: Exception) {}
+            keyboardController?.show()
+        }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("") },
+                navigationIcon = {
+                    // No left navigation content to keep the app title flush to the left with no extra gap
+                },
+                title = {
+                    val titleAlpha by androidx.compose.animation.core.animateFloatAsState(
+                        targetValue = if (searchMode) 0f else 1f,
+                        label = "titleAlpha"
+                    )
+                    val searchAlpha by androidx.compose.animation.core.animateFloatAsState(
+                        targetValue = if (searchMode) 1f else 0f,
+                        label = "searchAlpha"
+                    )
+                    Box(Modifier.fillMaxWidth()) {
+                        // Static title text (fades out but stays in place to avoid vertical shift)
+                        Text(
+                            text = androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.app_name),
+                            modifier = Modifier
+                                .align(Alignment.CenterStart)
+                                .graphicsLayer { alpha = titleAlpha }
+                        )
+
+                        // Inline, borderless search field (fades in exactly over the title)
+                        TextField(
+                            value = query,
+                            onValueChange = viewModel::updateQuery,
+                            placeholder = { Text(text = androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.search_hint)) },
+                            singleLine = true,
+                            colors = TextFieldDefaults.colors(
+                                focusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                                unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                                disabledIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                                focusedContainerColor = androidx.compose.ui.graphics.Color.Transparent,
+                                unfocusedContainerColor = androidx.compose.ui.graphics.Color.Transparent,
+                                disabledContainerColor = androidx.compose.ui.graphics.Color.Transparent
+                            ),
+                            modifier = Modifier
+                                .align(Alignment.CenterStart)
+                                .fillMaxWidth()
+                                .focusRequester(searchFocusRequester)
+                                .graphicsLayer { alpha = searchAlpha }
+                        )
+                    }
+                },
                 actions = {
                     // Multi-select actions (icons) appear at the left of Settings when selection mode is active
                     if (selectionMode) {
@@ -117,7 +188,26 @@ fun PromptListScreen(
                             Icon(imageVector = androidx.compose.material.icons.Icons.Filled.Delete, contentDescription = androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.delete))
                         }
                     }
-                    // Settings at top-right
+
+                    // When in search mode, show a Close (X) on the right next to Settings.
+                    if (searchMode) {
+                        IconButton(onClick = {
+                            // Close search and clear the query
+                            viewModel.clearQuery()
+                            searchMode = false
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
+                        }) {
+                            Icon(imageVector = androidx.compose.material.icons.Icons.Filled.Close, contentDescription = androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.close))
+                        }
+                    } else {
+                        // Search toggle when not in search mode
+                        IconButton(onClick = { searchMode = true }) {
+                            Icon(imageVector = androidx.compose.material.icons.Icons.Filled.Search, contentDescription = androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.search))
+                        }
+                    }
+
+                    // Settings at top-right (always visible)
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(imageVector = androidx.compose.material.icons.Icons.Filled.Settings, contentDescription = androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.settings))
                     }
@@ -150,92 +240,146 @@ fun PromptListScreen(
                 )
             }
         } else {
-            val listState = rememberLazyListState()
-            val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
+            val hapticsLocal = androidx.compose.ui.platform.LocalHapticFeedback.current
             val reorderState = rememberReorderableLazyListState(
                 listState = listState,
                 onMove = { from, to ->
+                    if (query.isNotBlank()) return@rememberReorderableLazyListState
                     // In-place mutate the SnapshotStateList to avoid recomposition churn
                     if (from.index != to.index && from.index in 0 until localList.size && to.index in 0..localList.size) {
                         val moved = localList.removeAt(from.index)
                         val safeTo = to.index.coerceIn(0, localList.size)
                         localList.add(safeTo, moved)
                     }
-                    try { haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove) } catch (_: Exception) {}
+                    try { hapticsLocal.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove) } catch (_: Exception) {}
                 },
                 onDragEnd = { _, _ ->
-                    viewModel.persistOrder(localList)
+                    if (query.isBlank()) viewModel.persistOrder(localList)
                 }
             )
             LazyColumn(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .reorderable(reorderState),
+                    .then(if (query.isBlank()) Modifier.reorderable(reorderState) else Modifier),
                 state = listState
             ) {
-                items(localList, key = { it.id }) { prompt ->
-                    val checked = selectedIds.contains(prompt.id)
-                    ReorderableItem(reorderState, key = prompt.id) { isDragging ->
-                        // When dragging starts (after long‑press), immediately enter selection mode
-                        LaunchedEffect(isDragging) {
-                            if (isDragging) {
-                                if (!selectionMode) selectionMode = true
-                                selectedIds = setOf(prompt.id)
-                                try { haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress) } catch (_: Exception) {}
-                            }
+                val data = if (query.isBlank()) localList else filtered
+                if (data.isEmpty() && query.isNotBlank()) {
+                    item {
+                        Box(modifier = Modifier
+                            .fillMaxSize()
+                            .height(200.dp)) {
+                            Text(
+                                text = androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.no_results_message),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
                         }
-                        ListItem(
-                            headlineContent = { Text(prompt.title) },
-                            supportingContent = {
-                                val actionLabel = if (prompt.outputType == 0) {
-                                    when (prompt.resultAction) {
-                                        1 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_copy_to_clipboard)
-                                        2 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_notification)
-                                        4 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_popup)
-                                        else -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_process_result)
-                                    }
-                                } else {
-                                    when (prompt.resultAction) {
-                                        2 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_notification_image)
-                                        3 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_save_gallery)
-                                        4 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_popup)
-                                        else -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_process_result)
-                                    }
-                                }
-                                Column {
-                                    if (prompt.template.isNotBlank()) {
-                                        Text(
-                                            text = prompt.template.take(60).replace("\n", " ") + if (prompt.template.length > 60) "…" else "",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                    Text(actionLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
-                            },
-                            colors = ListItemDefaults.colors(
-                                containerColor = if (checked) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface
-                            ),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .then(if (!isDragging) Modifier.animateItemPlacement() else Modifier)
-                                .graphicsLayer {
+                    }
+                } else {
+                    items(data, key = { it.id }) { prompt ->
+                        val checked = selectedIds.contains(prompt.id)
+                        val itemModifierBase = Modifier
+                            .fillMaxWidth()
+                            .clickable { if (selectionMode) toggleSelect(prompt.id) else onEditPrompt(prompt.id) }
+                        if (query.isBlank()) {
+                            ReorderableItem(reorderState, key = prompt.id) { isDragging ->
+                                // When dragging starts (after long‑press), immediately enter selection mode
+                                LaunchedEffect(isDragging) {
                                     if (isDragging) {
-                                        shadowElevation = 12f
-                                        scaleX = 1.01f
-                                        scaleY = 1.01f
-                                    } else {
-                                        shadowElevation = 0f
-                                        scaleX = 1f
-                                        scaleY = 1f
+                                        if (!selectionMode) selectionMode = true
+                                        selectedIds = setOf(prompt.id)
+                                        try { haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress) } catch (_: Exception) {}
                                     }
                                 }
-                                .detectReorderAfterLongPress(reorderState)
-                                .clickable {
-                                    if (selectionMode) toggleSelect(prompt.id) else onEditPrompt(prompt.id)
-                                }
-                        )
-                        Divider()
+                                ListItem(
+                                    headlineContent = { Text(prompt.title) },
+                                    supportingContent = {
+                                        val actionLabel = if (prompt.outputType == 0) {
+                                            when (prompt.resultAction) {
+                                                1 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_copy_to_clipboard)
+                                                2 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_notification)
+                                                4 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_popup)
+                                                else -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_process_result)
+                                            }
+                                        } else {
+                                            when (prompt.resultAction) {
+                                                2 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_notification_image)
+                                                3 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_save_gallery)
+                                                4 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_popup)
+                                                else -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_process_result)
+                                            }
+                                        }
+                                        Column {
+                                            if (prompt.template.isNotBlank()) {
+                                                Text(
+                                                    text = prompt.template.take(60).replace("\n", " ") + if (prompt.template.length > 60) "…" else "",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                            Text(actionLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        }
+                                    },
+                                    colors = ListItemDefaults.colors(
+                                        containerColor = if (checked) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface
+                                    ),
+                                    modifier = itemModifierBase
+                                        .then(Modifier.animateItemPlacement())
+                                        .graphicsLayer {
+                                            if (isDragging) {
+                                                shadowElevation = 12f
+                                                scaleX = 1.01f
+                                                scaleY = 1.01f
+                                            } else {
+                                                shadowElevation = 0f
+                                                scaleX = 1f
+                                                scaleY = 1f
+                                            }
+                                        }
+                                        .detectReorderAfterLongPress(reorderState)
+                                )
+                                Divider()
+                            }
+                        } else {
+                            // No reorder wrapper while searching
+                            ListItem(
+                                headlineContent = { Text(prompt.title) },
+                                supportingContent = {
+                                    val actionLabel = if (prompt.outputType == 0) {
+                                        when (prompt.resultAction) {
+                                            1 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_copy_to_clipboard)
+                                            2 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_notification)
+                                            4 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_popup)
+                                            else -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_process_result)
+                                        }
+                                    } else {
+                                        when (prompt.resultAction) {
+                                            2 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_notification_image)
+                                            3 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_save_gallery)
+                                            4 -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_show_popup)
+                                            else -> androidx.compose.ui.res.stringResource(org.parkjw.capywarp.R.string.action_process_result)
+                                        }
+                                    }
+                                    Column {
+                                        if (prompt.template.isNotBlank()) {
+                                            Text(
+                                                text = prompt.template.take(60).replace("\n", " ") + if (prompt.template.length > 60) "…" else "",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        Text(actionLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                },
+                                colors = ListItemDefaults.colors(
+                                    containerColor = if (checked) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface
+                                ),
+                                modifier = itemModifierBase
+                            )
+                            Divider()
+                        }
                     }
                 }
             }

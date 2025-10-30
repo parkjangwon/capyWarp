@@ -3,6 +3,12 @@ package org.parkjw.capywarp.ui.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.parkjw.capywarp.data.model.Prompt
 import org.parkjw.capywarp.domain.repository.PromptRepository
@@ -13,6 +19,30 @@ class PromptListViewModel @Inject constructor(
     private val repository: PromptRepository
 ) : ViewModel() {
     val prompts = repository.getPrompts()
+
+    // Search query state
+    private val _query = MutableStateFlow("")
+    val query: StateFlow<String> = _query
+
+    // Filtered prompts based on query (title or template, case-insensitive)
+    val filteredPrompts: StateFlow<List<Prompt>> = prompts
+        .combine(_query) { list, q ->
+            val queryText = q.trim()
+            if (queryText.isBlank()) {
+                list
+            } else {
+                val lower = queryText.lowercase()
+                list.filter { p ->
+                    p.title.contains(queryText, ignoreCase = true) ||
+                        p.template.contains(queryText, ignoreCase = true)
+                }
+            }
+        }
+        .map { it.sortedBy { p -> p.order } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun updateQuery(newQuery: String) { _query.value = newQuery }
+    fun clearQuery() { _query.value = "" }
 
     fun deletePromptsByIds(ids: Set<Int>, onDone: (() -> Unit)? = null) {
         if (ids.isEmpty()) { onDone?.invoke(); return }

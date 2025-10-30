@@ -150,4 +150,8 @@
     <!-- Help: Gemini API -->
     <string name="help_section_gemini_api">5. Gemini API 指南</string>
     <string name="help_gemini_api_body">- API 密钥：从 Google AI Studio (makersuite.google.com/app/apikey) 获取，然后在设置 &gt; Gemini API 密钥中输入。\n- 模型：为文本提示词选择文本模型（例如 Gemini 2.5 Flash/Pro），为图片生成选择图片模型（例如 Gemini 2.5 Flash Image）。\n- 速率限制：免费套餐每分钟有请求限制。应用会在遇到速率限制错误时自动短暂重试。\n- 费用：使用付费模型可能会根据 Google AI 定价产生费用。请检查您的配额和账单。\n- 安全 &amp; 隐私：不要在提示词中粘贴凭据或敏感的个人身份信息。请查阅 Google 的安全政策。\n- 故障排除：如果您遇到身份验证/权限错误，请重新检查 API 密钥以及您所在地区/项目中模型的可用性。</string>
+    <!-- Search / Filter -->
+    <string name="search_hint">Search prompts</string>
+    <string name="clear_search">Clear search</string>
+    <string name="no_results_message">No results found.</string>
 </resources>

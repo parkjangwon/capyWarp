@@ -135,4 +135,8 @@
     <!-- Help: Gemini API -->
     <string name="help_section_gemini_api">5. Guía de la API de Gemini</string>
     <string name="help_gemini_api_body">- Clave API: Obténla en Google AI Studio (makersuite.google.com/app/apikey), luego ingrésala en Configuración &gt; Clave API de Gemini.\n- Modelos: Elige un modelo de texto para prompts de texto (ej. Gemini 2.5 Flash/Pro) y un modelo de imagen para generación de imágenes (ej. Gemini 2.5 Flash Image).\n- Límites de velocidad: El nivel gratuito tiene límites por minuto. La app reintenta automáticamente brevemente en errores de límite de velocidad.\n- Costos: Usar modelos de pago puede generar cargos según los precios de Google AI. Verifica tu cuota y facturación.\n- Seguridad &amp; privacidad: No pegues credenciales o información personal sensible en los prompts. Revisa las políticas de seguridad de Google.\n- Solución de problemas: Si obtienes errores de autenticación/permisos, vuelve a verificar la clave API y la disponibilidad del modelo en tu región/proyecto.</string>
+    <!-- Search / Filter -->
+    <string name="search_hint">Search prompts</string>
+    <string name="clear_search">Clear search</string>
+    <string name="no_results_message">No results found.</string>
 </resources>

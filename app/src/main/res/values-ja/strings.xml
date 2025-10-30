@@ -137,4 +137,8 @@
     <!-- Help: Gemini API -->
     <string name="help_section_gemini_api">5. Gemini APIガイド</string>
     <string name="help_gemini_api_body">- APIキー：Google AI Studio（makersuite.google.com/app/apikey）から取得し、設定 &gt; Gemini APIキーに入力します。\n- モデル：テキストプロンプトにはテキストモデル（例：Gemini 2.5 Flash/Pro）を、画像生成には画像モデル（例：Gemini 2.5 Flash Image）を選択します。\n- レート制限：無料プランには分単位の制限があります。アプリはレート制限エラー時に自動的に短時間リトライします。\n- コスト：有料モデルの使用には、Google AIの価格設定に従って料金が発生する場合があります。クォータと請求を確認してください。\n- セキュリティ &amp; プライバシー：プロンプトに認証情報や機密の個人情報を貼り付けないでください。Googleのセキュリティポリシーを確認してください。\n- トラブルシューティング：認証/権限エラーが発生した場合は、APIキーとお住まいの地域/プロジェクトでのモデルの可用性を再確認してください。</string>
+    <!-- Search / Filter -->
+    <string name="search_hint">Search prompts</string>
+    <string name="clear_search">Clear search</string>
+    <string name="no_results_message">No results found.</string>
 </resources>
