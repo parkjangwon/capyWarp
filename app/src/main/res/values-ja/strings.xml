@@ -126,7 +126,7 @@
     <string name="help_permissions_body">- 通知の投稿：処理/結果通知を表示するために必要です。\n- 他のアプリの上に表示（オーバーレイ）：「ポップアップで表示」を選択したときに、フローティング結果ポップアップを表示するために必要です。\n- ストレージ/メディア（スコープ）：「ギャラリーに保存」を選択したときに、生成された画像をギャラリーに保存するために必要です。</string>
 
     <string name="help_section_prompt_tips">2. プロンプトの管理 &amp; ヒント</string>
-    <string name="help_prompt_tips_body">- 選択したテキストを挿入する位置にプロンプトテンプレートで$TEXTを使用します。\n- プロンプトは短く具体的にしてください。設定 &gt; グローバルプロンプトに共通の指示を追加できます。\n- 画像の場合は、任意のアプリから画像をCapyWarpに共有し、画像対応のプロンプトを選択します。</string>
+    <string name="help_prompt_tips_body">- 選択したテキストを挿入する位置にプロンプトテンプレートで$TEXTを使用します。\n- プロンプトは短く具体的にしてください。設定 &gt; グローバルプロンプトに共通の指示を追加できます。\n- 画像の場合は、任意のアプリから画像をCapyWarpに共有し、画像対応のプロンプトを選択します。\n- メインリストの検索：上部の虫眼鏡をタップして名前とテンプレートを即時検索します。Xでクリア。\n- 並べ替え：プロンプトを長押ししてドラッグし、位置を変更します。離すと保存されます。\n- エディター：「プロンプト生成」を使って改善されたテンプレートを取得できます（Gemini APIキーが必要）。</string>
 
     <string name="help_section_how_to_run">3. プロンプトの実行方法</string>
     <string name="help_how_to_run_body">- テキスト：任意のアプリでテキストを選択し、選択コンテキストメニュー（PROCESS_TEXT）のWarp!ボタンをタップするか、共有/テキスト処理を使用してCapyWarpを選択し、プロンプトを選択します。\n- 画像/ファイル：システムの共有アクションを使用してファイルまたは画像をCapyWarpに送信し、プロンプトを選択します。</string>
@@ -136,7 +136,7 @@
 
     <!-- Help: Gemini API -->
     <string name="help_section_gemini_api">5. Gemini APIガイド</string>
-    <string name="help_gemini_api_body">- APIキー：Google AI Studio（makersuite.google.com/app/apikey）から取得し、設定 &gt; Gemini APIキーに入力します。\n- モデル：テキストプロンプトにはテキストモデル（例：Gemini 2.5 Flash/Pro）を、画像生成には画像モデル（例：Gemini 2.5 Flash Image）を選択します。\n- レート制限：無料プランには分単位の制限があります。アプリはレート制限エラー時に自動的に短時間リトライします。\n- コスト：有料モデルの使用には、Google AIの価格設定に従って料金が発生する場合があります。クォータと請求を確認してください。\n- セキュリティ &amp; プライバシー：プロンプトに認証情報や機密の個人情報を貼り付けないでください。Googleのセキュリティポリシーを確認してください。\n- トラブルシューティング：認証/権限エラーが発生した場合は、APIキーとお住まいの地域/プロジェクトでのモデルの可用性を再確認してください。</string>
+    <string name="help_gemini_api_body">- APIキー：Google AI Studio（makersuite.google.com/app/apikey）から取得し、設定 &gt; Gemini APIキーに入力します。\n- モデル：テキストプロンプトにはテキストモデル（例：Gemini 2.5 Flash/Pro）を、画像生成には画像モデル（例：Gemini 2.5 Flash Image）を選択します。\n- レート制限：無料プランには分単位の制限があります。アプリはレート制限エラー時に自動的に短時間リトライします。\n- コスト：有料モデルの使用には、Google AIの価格設定に従って料金が発生する場合があります。クォータと請求を確認してください。\n- セキュリティ &amp; プライバシー：プロンプトに認証情報や機密の個人情報を貼り付けないでください。Googleのセキュリティポリシーを確認してください。\n- トラブルシューティング：認証/権限エラーが発生した場合は、APIキーとお住まいの地域/プロジェクトでのモデルの可用性を再確認してください。\n- キー未設定: AI 機能には有効な API キーが必要です。未設定の場合、アプリは設定画面へ案内します。</string>
     <!-- Search / Filter -->
     <string name="search_hint">Search prompts</string>
     <string name="clear_search">Clear search</string>

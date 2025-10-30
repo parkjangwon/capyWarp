@@ -150,7 +150,7 @@
     <string name="help_permissions_body">- 알림 권한: 처리/결과 알림을 표시하기 위해 필요합니다.\n- 다른 앱 위에 표시(오버레이): 설정한 결과 동작이 \"팝업으로 표시\"일 때 떠 있는 팝업을 보여주기 위해 필요합니다.\n- 저장소/미디어(범위 권한): 생성된 이미지를 갤러리에 저장할 때 필요합니다.</string>
 
     <string name="help_section_prompt_tips">2. 프롬프트 관리 방법 및 Tip</string>
-    <string name="help_prompt_tips_body">- 선택한 텍스트가 들어갈 위치에 프롬프트 템플릿에 $TEXT 토큰을 사용하세요.\n- 프롬프트는 간결하고 구체적으로 작성하세요. 자주 쓰는 지시는 설정 &gt; 공통 프롬프트에 입력해 자동으로 덧붙일 수 있습니다.\n- 이미지 작업은 다른 앱에서 이미지를 CapyWarp로 공유한 뒤, 이미지 대응 프롬프트를 선택하세요.</string>
+    <string name="help_prompt_tips_body">- 선택한 텍스트가 들어갈 위치에 프롬프트 템플릿에 $TEXT 토큰을 사용하세요.\n- 프롬프트는 간결하고 구체적으로 작성하세요. 자주 쓰는 지시는 설정 &gt; 공통 프롬프트에 입력해 자동으로 덧붙일 수 있습니다.\n- 이미지 작업은 다른 앱에서 이미지를 CapyWarp로 공유한 뒤, 이미지 대응 프롬프트를 선택하세요.\n- 메인 목록 검색: 상단 돋보기를 눌러 이름/템플릿 전체를 즉시 검색합니다. X를 눌러 지울 수 있어요.\n- 순서 변경: 항목을 길게 누르고 드래그해 위치를 바꿉니다. 놓으면 저장돼요.\n- 에디터: "프롬프트 AI 생성"으로 의도를 입력하면 개선된 템플릿을 받아 적용할 수 있습니다(Gemini API 키 필요).</string>
 
     <string name="help_section_how_to_run">3. 프롬프트 실행 방식</string>
     <string name="help_how_to_run_body">- 텍스트: 어떤 앱에서든 텍스트를 선택하고 텍스트 처리 메뉴에서 Warp!를 선택한 뒤 프롬프트를 고르세요.\n- 이미지/파일: 시스템 공유 기능으로 이미지나 파일을 CapyWarp로 보내고 프롬프트를 선택하세요.</string>
@@ -160,7 +160,7 @@
 
     <!-- Help: Gemini API -->
     <string name="help_section_gemini_api">5. Gemini API 안내</string>
-    <string name="help_gemini_api_body">- API 키: Google AI Studio(makersuite.google.com/app/apikey)에서 발급받아 설정 &gt; Gemini API 키에 입력하세요.\n- 모델: 텍스트에는 텍스트 모델(예: Gemini 2.5 Flash/Pro), 이미지 생성에는 이미지 모델(예: Gemini 2.5 Flash Image)을 선택하세요.\n- 속도 제한: 무료 티어는 분당 요청 제한이 있습니다. 제한에 걸리면 앱이 짧게 대기 후 자동 재시도합니다.\n- 비용: 유료 모델 사용 시 Google AI 과금 정책에 따라 비용이 발생할 수 있습니다. 쿼터/과금 상태를 확인하세요.\n- 안전/개인정보: 비밀번호·토큰 등 민감 정보나 PII는 프롬프트에 넣지 마세요. Google의 안전 정책을 확인하세요.\n- 문제 해결: 인증/권한 오류가 발생하면 API 키가 정확한지, 해당 지역/프로젝트에서 선택한 모델을 사용할 수 있는지 확인하세요.</string>
+    <string name="help_gemini_api_body">- API 키: Google AI Studio(makersuite.google.com/app/apikey)에서 발급받아 설정 &gt; Gemini API 키에 입력하세요.\n- 모델: 텍스트에는 텍스트 모델(예: Gemini 2.5 Flash/Pro), 이미지 생성에는 이미지 모델(예: Gemini 2.5 Flash Image)을 선택하세요.\n- 속도 제한: 무료 티어는 분당 요청 제한이 있습니다. 제한에 걸리면 앱이 짧게 대기 후 자동 재시도합니다.\n- 비용: 유료 모델 사용 시 Google AI 과금 정책에 따라 비용이 발생할 수 있습니다. 쿼터/과금 상태를 확인하세요.\n- 안전/개인정보: 비밀번호·토큰 등 민감 정보나 PII는 프롬프트에 넣지 마세요. Google의 안전 정책을 확인하세요.\n- 문제 해결: 인증/권한 오류가 발생하면 API 키가 정확한지, 해당 지역/프로젝트에서 선택한 모델을 사용할 수 있는지 확인하세요.\n- 키 미설정 시: AI 기능은 유효한 API 키가 필요합니다. 키가 없으면 앱에서 설정 화면으로 안내합니다.</string>
     <!-- Search / Filter -->
     <string name="search_hint">검색</string>
     <string name="clear_search">검색어 지우기</string>

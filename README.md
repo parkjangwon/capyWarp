@@ -26,6 +26,7 @@ It works from anywhere using the Android share sheet (for images) or the text se
 
 ### 🧩 Prompt List
 
+* **Instant Search (toggle)**: Tap the magnifier in the top row to search across prompt names and full templates in real time. Tap X to clear. Reordering is disabled while searching to keep order consistent.
 * **Drag to Reorder (Long‑press)**: Long‑press a list item and, without lifting your finger, drag it up or down to change its position. You’ll feel a subtle haptic tick each time you cross an item. Release to save; order persists. The interaction is powered by a robust reorder engine for smooth, reliable movement even during fast scrubbing.
 * **Multi‑select Actions in App Bar**: Long‑press an item to select. When one item is selected, a Duplicate icon appears; when one or more are selected, a Delete icon appears. No bottom text buttons — all actions are in the top app bar.
 
