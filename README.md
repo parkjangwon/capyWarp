@@ -4,6 +4,9 @@
   <img src=".github/images/capyWarpLogo.png" alt="CapyLinker Logo" width="300"/>
 </p>
 
+<a href='https://play.google.com/store/apps/details?id=org.parkjw.capywarp&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width='200'/></a>
+
+
 CapyWarp is a lightweight Android utility that integrates into the OS and runs entirely on the Google Gemini API. 
 
 You send selected text or shared images to Gemini using prompts you define, and CapyWarp delivers the response in the way you prefer.
