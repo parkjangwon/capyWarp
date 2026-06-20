@@ -1,9 +1,18 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.google.ksp)
     alias(libs.plugins.google.hilt)
     alias(libs.plugins.kotlin.serialization)
+}
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
 }
 
 android {
@@ -26,8 +35,27 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            val keystorePath = localProperties.getProperty("CAPYWARP_KEYSTORE_FILE")
+                ?: localProperties.getProperty("CAPYLINKER_KEYSTORE_FILE")
+                ?: "capylinker-release.jks"
+            storeFile = rootProject.file(keystorePath)
+            storePassword = localProperties.getProperty("CAPYWARP_KEYSTORE_PASSWORD")
+                ?: localProperties.getProperty("CAPYLINKER_KEYSTORE_PASSWORD")
+                ?: ""
+            keyAlias = localProperties.getProperty("CAPYWARP_KEY_ALIAS")
+                ?: localProperties.getProperty("CAPYLINKER_KEY_ALIAS")
+                ?: "capylinker"
+            keyPassword = localProperties.getProperty("CAPYWARP_KEY_PASSWORD")
+                ?: localProperties.getProperty("CAPYLINKER_KEY_PASSWORD")
+                ?: ""
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
