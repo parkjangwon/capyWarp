@@ -1,3 +1,4 @@
+import java.io.File
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -15,6 +16,23 @@ if (localPropertiesFile.exists()) {
     localProperties.load(FileInputStream(localPropertiesFile))
 }
 
+val signingProperties = Properties()
+System.getenv("CAPYWARP_SIGNING_PROPERTIES_FILE")?.let { signingPropertiesPath ->
+    val signingPropertiesFile = File(signingPropertiesPath).let { file ->
+        if (file.isAbsolute) file else rootProject.file(signingPropertiesPath)
+    }
+    if (signingPropertiesFile.exists()) {
+        signingProperties.load(FileInputStream(signingPropertiesFile))
+    }
+}
+
+fun signingProperty(vararg names: String): String? =
+    names.firstNotNullOfOrNull { name ->
+        localProperties.getProperty(name)
+            ?: System.getenv(name)
+            ?: signingProperties.getProperty(name)
+    }
+
 android {
     namespace = "org.parkjw.capywarp"
 
@@ -28,8 +46,8 @@ android {
         applicationId = "org.parkjw.capywarp"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 6
-        versionName = "1.1.3"
+        versionCode = 7
+        versionName = "1.1.4"
         vectorDrawables { 
             useSupportLibrary = true 
         }
@@ -37,18 +55,14 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystorePath = localProperties.getProperty("CAPYWARP_KEYSTORE_FILE")
-                ?: localProperties.getProperty("CAPYLINKER_KEYSTORE_FILE")
+            val keystorePath = signingProperty("CAPYWARP_KEYSTORE_FILE", "CAPYLINKER_KEYSTORE_FILE")
                 ?: "capylinker-release.jks"
             storeFile = rootProject.file(keystorePath)
-            storePassword = localProperties.getProperty("CAPYWARP_KEYSTORE_PASSWORD")
-                ?: localProperties.getProperty("CAPYLINKER_KEYSTORE_PASSWORD")
+            storePassword = signingProperty("CAPYWARP_KEYSTORE_PASSWORD", "CAPYLINKER_KEYSTORE_PASSWORD")
                 ?: ""
-            keyAlias = localProperties.getProperty("CAPYWARP_KEY_ALIAS")
-                ?: localProperties.getProperty("CAPYLINKER_KEY_ALIAS")
+            keyAlias = signingProperty("CAPYWARP_KEY_ALIAS", "CAPYLINKER_KEY_ALIAS")
                 ?: "capylinker"
-            keyPassword = localProperties.getProperty("CAPYWARP_KEY_PASSWORD")
-                ?: localProperties.getProperty("CAPYLINKER_KEY_PASSWORD")
+            keyPassword = signingProperty("CAPYWARP_KEY_PASSWORD", "CAPYLINKER_KEY_PASSWORD")
                 ?: ""
         }
     }
