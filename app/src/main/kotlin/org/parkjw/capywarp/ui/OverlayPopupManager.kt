@@ -131,7 +131,6 @@ object OverlayPopupManager {
         // Prepare drag-to-move state (attach to header to avoid scroll conflicts)
         var lastX = 0f
         var lastY = 0f
-        var dragging = false
 
         // Header
         val header = LinearLayout(appCtx).apply {
@@ -158,12 +157,11 @@ object OverlayPopupManager {
             when (ev.actionMasked) {
                 MotionEvent.ACTION_DOWN -> { 
                     activateFocus()
-                    lastX = ev.rawX; lastY = ev.rawY; dragging = false; true 
+                    lastX = ev.rawX; lastY = ev.rawY; true 
                 }
                 MotionEvent.ACTION_MOVE -> {
                     val dx = (ev.rawX - lastX).toInt()
                     val dy = (ev.rawY - lastY).toInt()
-                    if (dx != 0 || dy != 0) dragging = true
                     lastX = ev.rawX
                     lastY = ev.rawY
                     updatePosAbsolute((lp.x + dx), (lp.y + dy))
@@ -259,8 +257,8 @@ object OverlayPopupManager {
                         putExtra(Intent.EXTRA_TEXT, text ?: "")
                     }
                 }
-                val title = if (imageUri != null) appCtx.getString(org.parkjw.capywarp.R.string.share_image_title) else appCtx.getString(org.parkjw.capywarp.R.string.share_text_title)
-                val chooser = Intent.createChooser(send, title).apply {
+                val shareTitle = if (imageUri != null) appCtx.getString(org.parkjw.capywarp.R.string.share_image_title) else appCtx.getString(org.parkjw.capywarp.R.string.share_text_title)
+                val chooser = Intent.createChooser(send, shareTitle).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }

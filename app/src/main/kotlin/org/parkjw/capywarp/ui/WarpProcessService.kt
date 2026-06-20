@@ -203,7 +203,6 @@ class WarpProcessService : Service() {
                 // Retry generateContent up to 3 times for non-network/server errors
                 var result: String
                 var attemptGen = 0
-                var lastEx: Exception? = null
                 while (true) {
                     attemptGen++
                     try {
@@ -213,7 +212,6 @@ class WarpProcessService : Service() {
                         result = geminiRepository.generateContent(text, prompt, attachmentBytes, resolvedMime)
                         break
                     } catch (e: Exception) {
-                        lastEx = e
                         val isNetwork = e is java.io.IOException || (e::class.java.name.contains("HttpException"))
                         if (isNetwork || attemptGen >= 3) throw e
                         // small backoff
@@ -352,7 +350,7 @@ class WarpProcessService : Service() {
                         } catch (_: Exception) { null }
 
                         if (finalBitmap != null && finalBytes != null) {
-                            val uri = cacheUri ?: writeImageToCacheAndGetUri(finalBytes!!, finalMime)
+                            val uri = cacheUri ?: writeImageToCacheAndGetUri(finalBytes, finalMime)
                             if (prompt.resultAction == 4 && uri != null) {
                                 // External overlay popup only (no Activity fallback)
                                 serviceScope.launch(Dispatchers.Main) {
@@ -403,7 +401,7 @@ class WarpProcessService : Service() {
                                     .setSmallIcon(android.R.drawable.ic_dialog_info)
                                     .setContentTitle(getString(org.parkjw.capywarp.R.string.notif_image_result_title))
                                     .setContentText(getString(org.parkjw.capywarp.R.string.notif_image_result_text))
-                                    .setStyle(NotificationCompat.BigPictureStyle().bigPicture(finalBitmap!!))
+                                    .setStyle(NotificationCompat.BigPictureStyle().bigPicture(finalBitmap))
                                     .addAction(android.R.drawable.ic_menu_edit, getString(org.parkjw.capywarp.R.string.action_copy_to_clipboard), piCopy)
                                     .addAction(android.R.drawable.ic_menu_save, getString(org.parkjw.capywarp.R.string.action_save_gallery), piSave)
                                     .addAction(android.R.drawable.ic_menu_share, getString(org.parkjw.capywarp.R.string.action_share), piShare)

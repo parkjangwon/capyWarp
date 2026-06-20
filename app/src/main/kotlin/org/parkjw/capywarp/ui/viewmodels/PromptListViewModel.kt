@@ -31,7 +31,6 @@ class PromptListViewModel @Inject constructor(
             if (queryText.isBlank()) {
                 list
             } else {
-                val lower = queryText.lowercase()
                 list.filter { p ->
                     p.title.contains(queryText, ignoreCase = true) ||
                         p.template.contains(queryText, ignoreCase = true)

@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import org.parkjw.capywarp.data.model.GeminiModels
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -38,8 +39,8 @@ class SettingsRepository @Inject constructor(
             else -> value
         }
     }
-    val model: Flow<String> = dataStore.data.map { it[MODEL_KEY] ?: "gemini-2.5-flash" }
-    val imageModel: Flow<String> = dataStore.data.map { it[IMAGE_MODEL_KEY] ?: "gemini-2.5-flash-image" }
+    val model: Flow<String> = dataStore.data.map { GeminiModels.normalizeTextModel(it[MODEL_KEY]) }
+    val imageModel: Flow<String> = dataStore.data.map { GeminiModels.normalizeImageModel(it[IMAGE_MODEL_KEY]) }
     val userPrompt: Flow<String> = dataStore.data.map { it[USER_PROMPT_KEY] ?: "" }
     val autoAttachSelectedText: Flow<Boolean> = dataStore.data.map { it[AUTO_ATTACH_KEY] ?: true }
     val autoAttachPosition: Flow<String> = dataStore.data.map { it[AUTO_ATTACH_POS_KEY] ?: "top" }
@@ -72,11 +73,11 @@ class SettingsRepository @Inject constructor(
     }
 
     suspend fun setModel(model: String) {
-        dataStore.edit { it[MODEL_KEY] = model }
+        dataStore.edit { it[MODEL_KEY] = GeminiModels.normalizeTextModel(model) }
     }
 
     suspend fun setImageModel(model: String) {
-        dataStore.edit { it[IMAGE_MODEL_KEY] = model }
+        dataStore.edit { it[IMAGE_MODEL_KEY] = GeminiModels.normalizeImageModel(model) }
     }
 
     suspend fun setUserPrompt(userPrompt: String) {

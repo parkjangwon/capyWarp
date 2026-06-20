@@ -13,10 +13,42 @@ data class GeminiRequest(
 
 @Serializable
 data class GenerationConfig(
-    // v1beta generateContent는 camelCase 키를 기대함
     @SerialName("responseMimeType")
     val responseMimeType: String? = null,
+    @SerialName("responseModalities")
+    val responseModalities: List<String>? = null,
 )
+
+object GeminiModels {
+    const val DEFAULT_TEXT = "gemini-3.5-flash"
+    const val DEFAULT_IMAGE = "gemini-3.1-flash-image"
+
+    val TEXT_OPTIONS = listOf(
+        DEFAULT_TEXT to "Gemini 3.5 Flash",
+        "gemini-3.1-flash-lite" to "Gemini 3.1 Flash-Lite",
+        "gemini-3.1-pro-preview" to "Gemini 3.1 Pro Preview",
+        "gemini-3-flash-preview" to "Gemini 3 Flash Preview",
+    )
+
+    val IMAGE_OPTIONS = listOf(
+        DEFAULT_IMAGE to "Gemini 3.1 Flash Image (Nano Banana 2)",
+        "gemini-3-pro-image" to "Gemini 3 Pro Image (Nano Banana Pro)",
+    )
+
+    fun normalizeTextModel(model: String?): String = when (model) {
+        null, "" -> DEFAULT_TEXT
+        "gemini-2.5-flash" -> DEFAULT_TEXT
+        "gemini-2.5-flash-lite" -> "gemini-3.1-flash-lite"
+        "gemini-2.5-pro" -> "gemini-3.1-pro-preview"
+        else -> model
+    }
+
+    fun normalizeImageModel(model: String?): String = when (model) {
+        null, "" -> DEFAULT_IMAGE
+        "gemini-2.5-flash-image" -> DEFAULT_IMAGE
+        else -> model
+    }
+}
 
 @Serializable
 data class GeminiContent(

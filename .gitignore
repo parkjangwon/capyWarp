@@ -122,3 +122,21 @@ keystore.properties
 # Android Studio patch files
 # Uncomment if you want to ignore auto-generated patch files
 # *.patch
+
+# Coding agents and local AI tooling
+.aider*
+.claude/
+.cline/
+.codex/
+.codegraph/
+.continue/
+.cursor/
+.gemini/
+.omx/
+.opencode/
+.roo/
+.windsurf/
+
+# Agent scratch/worktree state
+*.prompt.md
+agent-*/

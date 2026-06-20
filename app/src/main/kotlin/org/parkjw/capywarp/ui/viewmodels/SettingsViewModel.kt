@@ -15,8 +15,9 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.parkjw.capywarp.data.model.Prompt
 import org.parkjw.capywarp.data.model.BackupPayload
+import org.parkjw.capywarp.data.model.GeminiModels
+import org.parkjw.capywarp.data.model.Prompt
 import org.parkjw.capywarp.data.model.SettingsData
 import org.parkjw.capywarp.domain.repository.PromptRepository
 import org.parkjw.capywarp.domain.repository.SettingsRepository
@@ -43,14 +44,8 @@ class SettingsViewModel @Inject constructor(
     )
 
     companion object {
-        val AVAILABLE_MODELS = listOf(
-            "gemini-2.5-flash-lite" to "Gemini 2.5 Flash Lite",
-            "gemini-2.5-flash" to "Gemini 2.5 Flash",
-            "gemini-2.5-pro" to "Gemini 2.5 Pro",
-        )
-        val AVAILABLE_IMAGE_MODELS = listOf(
-            "gemini-2.5-flash-image" to "Gemini 2.5 Flash Image"
-        )
+        val AVAILABLE_MODELS = GeminiModels.TEXT_OPTIONS
+        val AVAILABLE_IMAGE_MODELS = GeminiModels.IMAGE_OPTIONS
         val AVAILABLE_LANGUAGES = listOf(
             "en" to "English",
             "ko" to "한국어",
@@ -63,8 +58,8 @@ class SettingsViewModel @Inject constructor(
             "ru" to "Русский",
             "pt" to "Português",
         )
-        const val DEFAULT_MODEL = "gemini-2.5-flash"
-        const val DEFAULT_IMAGE_MODEL = "gemini-2.5-flash-image"
+        const val DEFAULT_MODEL = GeminiModels.DEFAULT_TEXT
+        const val DEFAULT_IMAGE_MODEL = GeminiModels.DEFAULT_IMAGE
     }
 
     private val _apiKey = MutableStateFlow(settings.getApiKey())

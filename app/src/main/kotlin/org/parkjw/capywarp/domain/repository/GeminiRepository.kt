@@ -103,14 +103,6 @@ class GeminiRepository @Inject constructor(
         val isImageOutput = prompt.outputType == 1
         val isImageInput = (attachmentMime ?: "").startsWith("image/") && hasAttachment
         val isImageMode = isImageOutput || isImageInput
-        // 이미지 출력 요청은 v1beta generateContent에서 바이너리 MIME 응답을 허용하지 않으므로,
-        // 모델이 텍스트로 data URI 한 줄만 반환하도록 지시한다.
-        val finalPrompt = if (isImageOutput) buildString {
-            appendLine("다음 지시에 따라 이미지를 생성하고, 결과 이미지를 오직 한 줄의 데이터 URI로만 출력하세요.")
-            appendLine("형식: data:image/png;base64,AAAA... (설명/마크다운/코드블록 없이 순수 문자열 한 줄)")
-            appendLine()
-            append(basePrompt)
-        } else basePrompt
 
         // 사용자 프롬프트(항상 적용) 병합
         val userPrompt = try { settingsRepository.userPrompt.first() } catch (_: Exception) { "" }
@@ -118,8 +110,8 @@ class GeminiRepository @Inject constructor(
             appendLine("다음은 사용자의 지속 지시입니다. 모든 응답에 반드시 반영하세요:")
             appendLine(userPrompt.trim())
             appendLine()
-            append(finalPrompt)
-        } else finalPrompt
+            append(basePrompt)
+        } else basePrompt
 
         val parts = buildList {
             if (hasAttachment) {
@@ -165,14 +157,17 @@ class GeminiRepository @Inject constructor(
                     parts = parts
                 )
             ),
-            // 이미지 출력 모드도 텍스트 MIME만 허용됨: 400 방지 위해 text/plain으로 요청하거나 null
-            generationConfig = if (isImageOutput) GenerationConfig(responseMimeType = "text/plain") else null
+            generationConfig = if (isImageOutput) {
+                GenerationConfig(responseModalities = listOf("TEXT", "IMAGE"))
+            } else {
+                null
+            }
         )
 
         val model = if (isImageMode) {
-            settingsRepository.imageModel.first()
+            GeminiModels.normalizeImageModel(settingsRepository.imageModel.first())
         } else {
-            settingsRepository.model.first()
+            GeminiModels.normalizeTextModel(settingsRepository.model.first())
         }
 
         // 429 대비 간단한 재시도 (최대 2회 추가, 총 3회 시도)
@@ -186,18 +181,24 @@ class GeminiRepository @Inject constructor(
                 val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
                 try {
                     val resp = json.decodeFromString(org.parkjw.capywarp.data.model.GeminiResponse.serializer(), raw)
-                    val part = resp.candidates.firstOrNull()?.content?.parts?.firstOrNull()
-                        ?: throw Exception("응답이 비어있습니다.")
+                    val responseParts = resp.candidates.firstOrNull()?.content?.parts.orEmpty()
+                    if (responseParts.isEmpty()) {
+                        throw Exception("응답이 비어있습니다.")
+                    }
+                    val inline = responseParts.firstNotNullOfOrNull { it.inlineData?.data }
+                    val textOut = responseParts
+                        .mapNotNull { it.text }
+                        .joinToString(separator = "\n")
+                        .trim()
+                        .ifBlank { null }
                     return if (isImageOutput) {
-                        val inline = part.inlineData?.data
-                        val textOut = part.text
                         when {
                             inline != null -> inline
                             textOut != null -> extractFirstDataUriOrBase64(textOut)
                             else -> throw Exception("이미지 데이터가 응답에 없습니다.")
                         }
                     } else {
-                        part.text ?: throw Exception("텍스트 응답이 비어있습니다.")
+                        textOut ?: throw Exception("텍스트 응답이 비어있습니다.")
                     }
                 } catch (se: Exception) {
                     // 2) 이미지인 경우, raw 텍스트에서 data URI 또는 Base64를 추출 시도

@@ -7,7 +7,7 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface GeminiApiService {
-    @POST("v1beta/models/{model}:generateContent")
+    @POST("v1/models/{model}:generateContent")
     suspend fun generateContent(
         @Path("model") model: String,
         @Body request: GeminiRequest

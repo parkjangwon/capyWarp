@@ -48,6 +48,7 @@ It works from anywhere using the Android share sheet (for images) or the text se
 CapyWarp works exclusively with the Google Gemini API.
 - Get an API key from Google AI Studio: https://makersuite.google.com/app/apikey
 - Read Gemini docs: https://ai.google.dev/gemini-api/docs
+- Default models: Gemini 3.5 Flash for text and Gemini 3.1 Flash Image for image generation.
 
 We’re grateful for Gemini — this app is built with it in mind.
 
