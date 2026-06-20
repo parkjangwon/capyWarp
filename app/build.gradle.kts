@@ -19,8 +19,8 @@ android {
         applicationId = "org.parkjw.capywarp"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 5
-        versionName = "1.1.2"
+        versionCode = 6
+        versionName = "1.1.3"
         vectorDrawables { 
             useSupportLibrary = true 
         }
